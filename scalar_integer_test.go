@@ -26,3 +26,13 @@ func (s *KredisTestSuite) TestNewIntegerWithDefaultValue() {
 	s.NoError(e)
 	s.Equal(5678, k.Value())
 }
+
+func (s *KredisTestSuite) TestBadConnection() {
+	cfg := "badconn"
+
+	k, _ := NewInteger("foo", Options{Config: &cfg})
+	_, e := k.ValueWithErr()
+
+	s.Error(e)
+	s.Empty(k.Value())
+}
