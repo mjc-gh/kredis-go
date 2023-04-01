@@ -32,7 +32,6 @@ func NewProxy(key string, options Options) (*Proxy, error) {
 		key = fmt.Sprintf("%s:%s", *namespace, key)
 	}
 
-	// TODO use namspace
 	return &Proxy{
 		// TODO figure out the best way to handle context
 		ctx:          context.Background(),
