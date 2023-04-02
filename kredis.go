@@ -1,5 +1,7 @@
 package kredis
 
+import "time"
+
 type KredisTyped interface {
-	~int | ~string
+	~int | ~string | time.Time
 }

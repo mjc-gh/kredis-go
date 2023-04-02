@@ -1,5 +1,7 @@
 package kredis
 
+import "time"
+
 func (s *KredisTestSuite) TestStringList() {
 	elems := make([]string, 5)
 
@@ -7,7 +9,7 @@ func (s *KredisTestSuite) TestStringList() {
 	s.NoError(e)
 
 	n, err := l.Elements(elems)
-	s.NoError(e)
+	s.NoError(err)
 	s.Equal(0, n)
 
 	llen, err := l.Append("a", "b", "c")
@@ -28,6 +30,27 @@ func (s *KredisTestSuite) TestStringList() {
 	s.NoError(err)
 	s.Equal(3, n)
 	s.Equal([]string{"y", "x", "a"}, elems)
+}
+
+func (s *KredisTestSuite) TestTimeList() {
+	elems := make([]time.Time, 1)
+
+	t1 := time.Now()
+
+	l, e := NewTimeList("list", Options{})
+	s.NoError(e)
+
+	n, err := l.Elements(elems)
+	s.NoError(err)
+	s.Equal(0, n)
+
+	llen, err := l.Append(t1)
+	s.NoError(err)
+	s.Equal(int64(1), llen)
+
+	n, err = l.Elements(elems)
+	s.NoError(err)
+	s.Equal([]time.Time{t1.UTC()}, elems)
 }
 
 func (s *KredisTestSuite) TestListBadConnection() {
