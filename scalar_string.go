@@ -13,7 +13,7 @@ func NewString(key string, options Options) (*ScalarString, error) {
 }
 
 func (s *ScalarString) Value() string {
-	val, err := s.ValueWithErr()
+	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
 		return s.DefaultValue()
@@ -22,7 +22,7 @@ func (s *ScalarString) Value() string {
 	return *val
 }
 
-func (s *ScalarString) ValueWithErr() (*string, error) {
+func (s *ScalarString) ValueResult() (*string, error) {
 	val, err := s.client.Get(s.ctx, s.key).Result()
 
 	if err != nil {

@@ -1,6 +1,6 @@
 package kredis
 
-func (s *KredisTestSuite) TestNewIntegerWithUnknownConnection() {
+func (s *KredisTestSuite) TestScalarIntegerWithUnknownConnection() {
 	config := "unknown"
 
 	_, e := NewInteger("foo", Options{Config: &config})
@@ -8,7 +8,7 @@ func (s *KredisTestSuite) TestNewIntegerWithUnknownConnection() {
 	s.Error(e)
 }
 
-func (s *KredisTestSuite) TestNewInteger() {
+func (s *KredisTestSuite) TestScalarInteger() {
 	k, e := NewInteger("foo", Options{})
 
 	s.NoError(e)
@@ -20,18 +20,18 @@ func (s *KredisTestSuite) TestNewInteger() {
 	s.Equal(1234, k.Value())
 }
 
-func (s *KredisTestSuite) TestNewIntegerWithDefaultValue() {
+func (s *KredisTestSuite) TestScalarIntegerWithDefaultValue() {
 	k, e := NewInteger("foo", Options{DefaultValue: 5678})
 
 	s.NoError(e)
 	s.Equal(5678, k.Value())
 }
 
-func (s *KredisTestSuite) TestBadConnection() {
+func (s *KredisTestSuite) TestScalarIntegerBadConnection() {
 	cfg := "badconn"
 
 	k, _ := NewInteger("foo", Options{Config: &cfg})
-	_, e := k.ValueWithErr()
+	_, e := k.ValueResult()
 
 	s.Error(e)
 	s.Empty(k.Value())

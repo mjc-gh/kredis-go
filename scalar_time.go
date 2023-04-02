@@ -4,11 +4,6 @@ import (
 	"time"
 )
 
-//t := time.Now()
-
-//fmt.Println(t.Format(time.RFC3339Nano))
-//fmt.Println(time.Parse(time.RFC3339Nano, t.Format(time.RFC3339Nano)))
-
 type ScalarTime struct{ Proxy }
 
 func NewTime(key string, options Options) (*ScalarTime, error) {
@@ -22,7 +17,7 @@ func NewTime(key string, options Options) (*ScalarTime, error) {
 }
 
 func (s *ScalarTime) Value() time.Time {
-	val, err := s.ValueWithErr()
+	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
 		return s.DefaultValue()
@@ -31,14 +26,8 @@ func (s *ScalarTime) Value() time.Time {
 	return *val
 }
 
-func (s *ScalarTime) ValueWithErr() (*time.Time, error) {
-	val, redisErr := s.client.Get(s.ctx, s.key).Result()
-
-	if redisErr != nil {
-		return nil, redisErr
-	}
-
-	time, err := time.Parse(time.RFC3339Nano, val)
+func (s *ScalarTime) ValueResult() (*time.Time, error) {
+	time, err := s.client.Get(s.ctx, s.key).Time()
 
 	if err != nil {
 		return nil, err

@@ -15,7 +15,7 @@ func NewInteger(key string, options Options) (*ScalarInteger, error) {
 }
 
 func (s *ScalarInteger) Value() int {
-	val, err := s.ValueWithErr()
+	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
 		return s.DefaultValue()
@@ -24,7 +24,7 @@ func (s *ScalarInteger) Value() int {
 	return *val
 }
 
-func (s *ScalarInteger) ValueWithErr() (*int, error) {
+func (s *ScalarInteger) ValueResult() (*int, error) {
 	val, err := s.client.Get(s.ctx, s.key).Int()
 
 	if err != nil {
