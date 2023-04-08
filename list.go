@@ -2,7 +2,6 @@ package kredis
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -28,56 +27,6 @@ func NewTimeList(key string, options Options) (*List[time.Time], error) {
 	}
 
 	return &List[time.Time]{Proxy: *proxy}, nil
-}
-
-func (l *List[T]) Append(elements ...T) (int64, error) {
-	values := l.elementsToValues(elements)
-
-	fmt.Println(len(values))
-	if len(values) < 1 {
-		return 0, errors.New("elements is empty")
-	}
-
-	llen, err := l.client.RPush(l.ctx, l.key, values...).Result()
-
-	fmt.Println(values)
-	fmt.Println(llen)
-	fmt.Println(err)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return llen, nil
-}
-
-func (l List[T]) Prepend(elements ...T) (int64, error) {
-	values := l.elementsToValues(elements)
-	llen, err := l.client.LPush(l.ctx, l.key, values...).Result()
-
-	if err != nil {
-		return 0, err
-	}
-
-	return llen, nil
-}
-
-//func (l *List[T]) Clear() error {
-//}
-
-func (l *List[T]) elementsToValues(elements []T) []interface{} {
-	values := make([]interface{}, len(elements))
-
-	for i, e := range elements {
-		switch any(e).(type) {
-		case time.Time:
-			values[i] = any(e).(time.Time).Format(time.RFC3339Nano)
-		default:
-			values[i] = e
-		}
-	}
-
-	return values
 }
 
 func (l *List[T]) Elements(elements []T) (int, error) {
@@ -107,4 +56,53 @@ func (l *List[T]) Elements(elements []T) (int, error) {
 	}
 
 	return total, nil
+}
+
+func (l *List[T]) Remove(elements ...T) error {
+	iter := newIter(elements)
+
+	for val, ok := iter.next(); ok; {
+		l.client.LRem(l.ctx, l.key, 0, val)
+
+		val, ok = iter.next()
+	}
+
+	return nil
+}
+
+func (l List[T]) Prepend(elements ...T) (int64, error) {
+	values := newIter(elements).values()
+	llen, err := l.client.LPush(l.ctx, l.key, values...).Result()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return llen, nil
+}
+
+func (l *List[T]) Append(elements ...T) (int64, error) {
+	values := newIter(elements).values()
+
+	if len(values) < 1 {
+		return 0, errors.New("elements is empty")
+	}
+
+	llen, err := l.client.RPush(l.ctx, l.key, values...).Result()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return llen, nil
+}
+
+func (l *List[T]) Clear() error {
+	_, err := l.client.Del(l.ctx, l.key).Result()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
