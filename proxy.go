@@ -2,7 +2,9 @@ package kredis
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -32,9 +34,13 @@ func NewProxy(key string, options Options) (*Proxy, error) {
 		key = fmt.Sprintf("%s:%s", *namespace, key)
 	}
 
+	if reflect.ValueOf(options.DefaultValue).Kind() == reflect.Ptr {
+		return nil, errors.New("default value cannot be a pointer")
+	}
+
 	return &Proxy{
 		// TODO figure out the best way to handle context
-		ctx:          context.Background(),
+		ctx:          context.TODO(),
 		client:       client,
 		key:          key,
 		expiresIn:    duration,
