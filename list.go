@@ -9,6 +9,16 @@ type List[T KredisTyped] struct {
 	Proxy
 }
 
+func NewIntegerList(key string, options Options) (*List[int], error) {
+	proxy, err := NewProxy(key, options)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[int]{Proxy: *proxy}, nil
+}
+
 func NewStringList(key string, options Options) (*List[string], error) {
 	proxy, err := NewProxy(key, options)
 

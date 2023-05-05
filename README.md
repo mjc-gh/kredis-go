@@ -5,7 +5,6 @@ much a WIP...
 
 ## Example
 
-
 ```go
 k, e := NewInteger("foo", Options{})
 k.SetValue(1234)
@@ -13,3 +12,12 @@ k.SetValue(1234)
 // prints: 1234
 fmt.Println(k.Value())
 ```
+
+## TODO
+
+- json scalar type
+- map scalar type? (serialized as json)
+- sets
+- hashs
+- counters
+- slots
