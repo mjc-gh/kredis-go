@@ -2,11 +2,37 @@ package kredis
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
 type List[T KredisTyped] struct {
 	Proxy
+}
+
+// TODO add support for default values
+// integer_list = Kredis.list "myintegerlist",
+//   typed: :integer,
+//   default: [ 1, 2, 3 ] # => EXISTS? myintegerlist, RPUSH myintegerlist "1" "2" "3"
+
+func NewBoolList(key string, options Options) (*List[bool], error) {
+	proxy, err := NewProxy(key, options)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[bool]{Proxy: *proxy}, nil
+}
+
+func NewIntegerList(key string, options Options) (*List[int], error) {
+	proxy, err := NewProxy(key, options)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[int]{Proxy: *proxy}, nil
 }
 
 func NewStringList(key string, options Options) (*List[string], error) {
@@ -29,6 +55,16 @@ func NewTimeList(key string, options Options) (*List[time.Time], error) {
 	return &List[time.Time]{Proxy: *proxy}, nil
 }
 
+func NewJSONList(key string, options Options) (*List[kredisJSON], error) {
+	proxy, err := NewProxy(key, options)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[kredisJSON]{Proxy: *proxy}, nil
+}
+
 func (l *List[T]) Elements(elements []T) (int, error) {
 	var total int
 
@@ -44,6 +80,14 @@ func (l *List[T]) Elements(elements []T) (int, error) {
 		}
 
 		switch any(elements[i]).(type) {
+		case bool:
+			b, _ := strconv.ParseBool(e)
+
+			elements[i] = any(b).(T)
+		case kredisJSON:
+			j := kredisJSON(e)
+
+			elements[i] = any(j).(T)
 		case time.Time:
 			t, _ := time.Parse(time.RFC3339Nano, e)
 
@@ -69,6 +113,9 @@ func (l *List[T]) Remove(elements ...T) error {
 
 	return nil
 }
+
+// TODO should Prepend and Append return an int not an int64 for greater ease
+// of use??
 
 func (l List[T]) Prepend(elements ...T) (int64, error) {
 	values := newIter(elements).values()

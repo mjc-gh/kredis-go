@@ -13,9 +13,11 @@ func (s *KredisTestSuite) TestNewTime() {
 	now := time.Now()
 
 	e = k.SetValue(now)
-
 	s.NoError(e)
-	s.Equal(now.UTC(), k.Value())
+
+	// The canonical way to strip a monotonic clock reading is to use t =
+	// t.Round(0).
+	s.Equal(now.Round(0), k.Value())
 }
 
 func (s *KredisTestSuite) TestNewTimeWithDefaultValue() {

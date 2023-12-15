@@ -18,7 +18,7 @@ type Proxy struct {
 	client       *redis.Client
 	key          string
 	expiresIn    time.Duration
-	defaultValue any
+	defaultValue any // TODO deprecate this field
 }
 
 func NewProxy(key string, options Options) (*Proxy, error) {

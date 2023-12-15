@@ -16,7 +16,7 @@ func newIter[T KredisTyped](elements []T) iterator[T] {
 	return &iter[T]{elements}
 }
 
-func (i* iter[T]) next() (T, bool) {
+func (i *iter[T]) next() (T, bool) {
 	if len(i.elements) == 0 {
 		var zero T
 		return zero, false
@@ -35,6 +35,8 @@ func (i *iter[T]) values() []interface{} {
 		switch any(e).(type) {
 		case time.Time:
 			values[i] = any(e).(time.Time).Format(time.RFC3339Nano)
+		case kredisJSON:
+			values[i] = any(e).(kredisJSON).String()
 		default:
 			values[i] = e
 		}
