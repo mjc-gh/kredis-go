@@ -3,16 +3,18 @@ package kredis
 import (
 	"strconv"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type List[T KredisTyped] struct {
 	Proxy
 }
 
-// TODO add support for default values
-// integer_list = Kredis.list "myintegerlist",
-//   typed: :integer,
-//   default: [ 1, 2, 3 ] # => EXISTS? myintegerlist, RPUSH myintegerlist "1" "2" "3"
+// TODO finish generic Default factories
+// TODO use expiresIn
+
+// List[bool] type
 
 func NewBoolList(key string, opts ...ProxyOption) (*List[bool], error) {
 	proxy, err := NewProxy(key, opts...)
@@ -42,7 +44,19 @@ func NewBoolListWithDefault(key string, defaultElements []bool, opts ...ProxyOpt
 	return
 }
 
-func NewIntListWithDefault(key string, defaultElements []int, opts ...ProxyOption) (l *List[int], err error) {
+// List[int] type
+
+func NewIntegerList(key string, opts ...ProxyOption) (*List[int], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[int]{Proxy: *proxy}, nil
+}
+
+func NewIntegerListWithDefault(key string, defaultElements []int, opts ...ProxyOption) (l *List[int], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -60,15 +74,7 @@ func NewIntListWithDefault(key string, defaultElements []int, opts ...ProxyOptio
 	return
 }
 
-func NewIntegerList(key string, opts ...ProxyOption) (*List[int], error) {
-	proxy, err := NewProxy(key, opts...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &List[int]{Proxy: *proxy}, nil
-}
+// List[string] type
 
 func NewStringList(key string, opts ...ProxyOption) (*List[string], error) {
 	proxy, err := NewProxy(key, opts...)
@@ -80,6 +86,26 @@ func NewStringList(key string, opts ...ProxyOption) (*List[string], error) {
 	return &List[string]{Proxy: *proxy}, nil
 }
 
+func NewStringListWithDefault(key string, defaultElements []string, opts ...ProxyOption) (l *List[string], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	l = &List[string]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// List[time] type
+
 func NewTimeList(key string, opts ...ProxyOption) (*List[time.Time], error) {
 	proxy, err := NewProxy(key, opts...)
 
@@ -90,6 +116,26 @@ func NewTimeList(key string, opts ...ProxyOption) (*List[time.Time], error) {
 	return &List[time.Time]{Proxy: *proxy}, nil
 }
 
+func NewTimeListWithDefault(key string, defaultElements []time.Time, opts ...ProxyOption) (l *List[time.Time], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	l = &List[time.Time]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// List[kredisJSON] type
+
 func NewJSONList(key string, opts ...ProxyOption) (*List[kredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 
@@ -99,6 +145,26 @@ func NewJSONList(key string, opts ...ProxyOption) (*List[kredisJSON], error) {
 
 	return &List[kredisJSON]{Proxy: *proxy}, nil
 }
+
+func NewJSONListWithDefault(key string, defaultElements []kredisJSON, opts ...ProxyOption) (l *List[kredisJSON], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	l = &List[kredisJSON]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// generic List functions
 
 func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int, err error) {
 	rangeOptions := RangeOptions{0}
@@ -194,6 +260,15 @@ func (l *List[T]) Clear() error {
 	}
 
 	return nil
+}
+
+func (l *List[T]) Length() (llen int64, err error) {
+	llen, err = l.client.LLen(l.ctx, l.key).Result()
+	if err == redis.Nil {
+		err = nil
+	}
+
+	return
 }
 
 // TODO add function last(n = 1) ??

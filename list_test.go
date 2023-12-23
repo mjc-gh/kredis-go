@@ -34,6 +34,18 @@ func (s *KredisTestSuite) TestStringList() {
 	s.Equal([]string{"y", "x", "a"}, elems)
 }
 
+func (s *KredisTestSuite) TestStringListWithDefault() {
+	l, _ := NewStringListWithDefault("list_default", []string{"a"})
+
+	NewStringListWithDefault("list_default", []string{"x", "y", "z"})
+
+	elems := make([]string, 3)
+	n, e := l.Elements(elems)
+	s.NoError(e)
+	s.Equal(1, n)
+	s.Equal([]string{"a"}, elems[0:1])
+}
+
 func (s *KredisTestSuite) TestIntegerList() {
 	elems := make([]int, 5)
 
@@ -62,6 +74,18 @@ func (s *KredisTestSuite) TestIntegerList() {
 	s.NoError(err)
 	s.Equal(3, n)
 	s.Equal([]int{9, 8, 1}, elems)
+}
+
+func (s *KredisTestSuite) TestIntegerListWithDefault() {
+	l, _ := NewIntegerListWithDefault("list_default", []int{5, 7, 9})
+
+	NewIntegerListWithDefault("list_default", []int{1, 2, 3, 4, 5})
+
+	elems := make([]int, 3)
+	n, e := l.Elements(elems)
+	s.NoError(e)
+	s.Equal(3, n)
+	s.Equal([]int{5, 7, 9}, elems)
 }
 
 func (s *KredisTestSuite) TestBoolList() {
@@ -95,21 +119,12 @@ func (s *KredisTestSuite) TestBoolList() {
 }
 
 func (s *KredisTestSuite) TestBoolListWithDefault() {
+	l, _ := NewBoolListWithDefault("bool_list_default", []bool{true, false, true})
+
+	NewBoolListWithDefault("bool_list_default", []bool{false, false, false, false})
+
 	elems := make([]bool, 3)
-
-	l, e := NewBoolListWithDefault("bool_list_default", []bool{true, false, true})
-	s.NoError(e)
-
 	n, e := l.Elements(elems)
-	s.NoError(e)
-	s.Equal(3, n)
-	s.Equal([]bool{true, false, true}, elems)
-
-	l2, e := NewBoolListWithDefault("bool_list_default", []bool{false, false, false, false})
-	s.NoError(e)
-
-	elems = make([]bool, 3)
-	n, e = l2.Elements(elems)
 	s.NoError(e)
 	s.Equal(3, n)
 	s.Equal([]bool{true, false, true}, elems)
@@ -142,6 +157,21 @@ func (s *KredisTestSuite) TestTimeList() {
 	s.Equal(2, n)
 
 	s.Equal([]time.Time{t1.Round(0), t2.Round(0)}, elems)
+}
+
+func (s *KredisTestSuite) TestTimeListWithDefault() {
+	t1 := time.Date(2021, time.Month(2), 21, 1, 10, 30, 0, time.UTC)
+	t2 := time.Date(2022, time.Month(2), 21, 12, 10, 30, 0, time.UTC)
+
+	l, _ := NewTimeListWithDefault("list_default", []time.Time{t1, t2})
+
+	NewTimeListWithDefault("list_default", []time.Time{time.Now()})
+
+	elems := make([]time.Time, 3)
+	n, e := l.Elements(elems)
+	s.NoError(e)
+	s.Equal(2, n)
+	s.Equal([]time.Time{t1, t2}, elems[0:2])
 }
 
 func (s *KredisTestSuite) TestJSONList() {
@@ -181,7 +211,22 @@ func (s *KredisTestSuite) TestJSONList() {
 	s.Equal(map[string]interface{}{"k1": "v1"}, data)
 }
 
-func (s *KredisTestSuite) TestElementsWithOptions() {
+func (s *KredisTestSuite) TestJSONListWithDefault() {
+	kj_1 := NewKredisJSON(`{"k1":"v1"}`)
+	kj_2 := NewKredisJSON(`{"k2":"v2"}`)
+
+	l, _ := NewJSONListWithDefault("list_default", []kredisJSON{*kj_1, *kj_2})
+
+	NewJSONListWithDefault("list_default", []kredisJSON{*NewKredisJSON(`{"abc":"xyz"}`)})
+
+	elems := make([]kredisJSON, 3)
+	n, e := l.Elements(elems)
+	s.NoError(e)
+	s.Equal(2, n)
+	s.Equal([]kredisJSON{*kj_1, *kj_2}, elems[0:2])
+}
+
+func (s *KredisTestSuite) TestElementsWithRangeOptions() {
 	l, _ := NewIntegerList("list")
 	_, e := l.Append(1, 2, 3, 4, 5, 6)
 	s.NoError(e)
@@ -197,6 +242,20 @@ func (s *KredisTestSuite) TestElementsWithOptions() {
 	s.NoError(e)
 	s.Equal(2, n)
 	s.Equal([]int{4, 5}, elems)
+}
+
+func (s *KredisTestSuite) TestListLength() {
+	l, _ := NewStringList("list")
+	n, e := l.Length()
+	s.NoError(e)
+	s.Equal(int64(0), n)
+
+	_, e = l.Append("a", "b", "c", "d", "e")
+	s.NoError(e)
+
+	n, e = l.Length()
+	s.NoError(e)
+	s.Equal(int64(5), n)
 }
 
 func (s *KredisTestSuite) TestListClear() {
