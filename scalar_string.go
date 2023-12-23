@@ -2,8 +2,8 @@ package kredis
 
 type ScalarString struct{ Proxy }
 
-func NewString(key string, options Options) (*ScalarString, error) {
-	proxy, err := NewProxy(key, options)
+func NewString(key string, opts ...ProxyOption) (*ScalarString, error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -12,8 +12,8 @@ func NewString(key string, options Options) (*ScalarString, error) {
 	return &ScalarString{Proxy: *proxy}, err
 }
 
-func NewStringWithDefault(key string, options Options, defaultValue string) (s *ScalarString, err error) {
-	proxy, err := NewProxy(key, options)
+func NewStringWithDefault(key string, defaultValue string, opts ...ProxyOption) (s *ScalarString, err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}

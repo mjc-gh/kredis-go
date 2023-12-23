@@ -18,14 +18,16 @@ type Proxy struct {
 	expiresIn time.Duration
 }
 
-func NewProxy(key string, options Options) (*Proxy, error) {
-	client, namespace, err := getConnection(options.GetConfig())
+func NewProxy(key string, opts ...ProxyOption) (*Proxy, error) {
+	options := ProxyOptions{}
+	for _, opt := range opts {
+		opt(&options)
+	}
 
+	client, namespace, err := getConnection(options.Config())
 	if err != nil {
 		return nil, err
 	}
-
-	duration, _ := time.ParseDuration(options.ExpiresIn)
 
 	if namespace != nil {
 		key = fmt.Sprintf("%s:%s", *namespace, key)
@@ -36,7 +38,7 @@ func NewProxy(key string, options Options) (*Proxy, error) {
 		ctx:       context.TODO(),
 		client:    client,
 		key:       key,
-		expiresIn: duration,
+		expiresIn: options.ExpiresIn(),
 	}, nil
 }
 

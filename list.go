@@ -1,7 +1,6 @@
 package kredis
 
 import (
-	"errors"
 	"strconv"
 	"time"
 )
@@ -15,8 +14,8 @@ type List[T KredisTyped] struct {
 //   typed: :integer,
 //   default: [ 1, 2, 3 ] # => EXISTS? myintegerlist, RPUSH myintegerlist "1" "2" "3"
 
-func NewBoolList(key string, options Options) (*List[bool], error) {
-	proxy, err := NewProxy(key, options)
+func NewBoolList(key string, opts ...ProxyOption) (*List[bool], error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -25,8 +24,8 @@ func NewBoolList(key string, options Options) (*List[bool], error) {
 	return &List[bool]{Proxy: *proxy}, nil
 }
 
-func NewBoolListWithDefault(key string, options Options, defaultElements []bool) (l *List[bool], err error) {
-	proxy, err := NewProxy(key, options)
+func NewBoolListWithDefault(key string, defaultElements []bool, opts ...ProxyOption) (l *List[bool], err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}
@@ -43,8 +42,8 @@ func NewBoolListWithDefault(key string, options Options, defaultElements []bool)
 	return
 }
 
-func NewIntListWithDefault(key string, options Options, defaultElements []int) (l *List[int], err error) {
-	proxy, err := NewProxy(key, options)
+func NewIntListWithDefault(key string, defaultElements []int, opts ...ProxyOption) (l *List[int], err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}
@@ -61,8 +60,8 @@ func NewIntListWithDefault(key string, options Options, defaultElements []int) (
 	return
 }
 
-func NewIntegerList(key string, options Options) (*List[int], error) {
-	proxy, err := NewProxy(key, options)
+func NewIntegerList(key string, opts ...ProxyOption) (*List[int], error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -71,8 +70,8 @@ func NewIntegerList(key string, options Options) (*List[int], error) {
 	return &List[int]{Proxy: *proxy}, nil
 }
 
-func NewStringList(key string, options Options) (*List[string], error) {
-	proxy, err := NewProxy(key, options)
+func NewStringList(key string, opts ...ProxyOption) (*List[string], error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -81,8 +80,8 @@ func NewStringList(key string, options Options) (*List[string], error) {
 	return &List[string]{Proxy: *proxy}, nil
 }
 
-func NewTimeList(key string, options Options) (*List[time.Time], error) {
-	proxy, err := NewProxy(key, options)
+func NewTimeList(key string, opts ...ProxyOption) (*List[time.Time], error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -91,8 +90,8 @@ func NewTimeList(key string, options Options) (*List[time.Time], error) {
 	return &List[time.Time]{Proxy: *proxy}, nil
 }
 
-func NewJSONList(key string, options Options) (*List[kredisJSON], error) {
-	proxy, err := NewProxy(key, options)
+func NewJSONList(key string, opts ...ProxyOption) (*List[kredisJSON], error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -101,13 +100,17 @@ func NewJSONList(key string, options Options) (*List[kredisJSON], error) {
 	return &List[kredisJSON]{Proxy: *proxy}, nil
 }
 
-func (l *List[T]) Elements(elements []T) (int, error) {
-	var total int
+func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int, err error) {
+	rangeOptions := RangeOptions{0}
+	for _, opt := range opts {
+		opt(&rangeOptions)
+	}
 
-	lrange, err := l.client.LRange(l.ctx, l.key, 0, len(elements)).Result()
-
+	// TODO should we read all elements?
+	stop := rangeOptions.start + int64(len(elements))
+	lrange, err := l.client.LRange(l.ctx, l.key, rangeOptions.start, stop).Result()
 	if err != nil {
-		return total, err
+		return
 	}
 
 	for i, e := range lrange {
@@ -120,6 +123,10 @@ func (l *List[T]) Elements(elements []T) (int, error) {
 			b, _ := strconv.ParseBool(e)
 
 			elements[i] = any(b).(T)
+		case int:
+			n, _ := strconv.Atoi(e)
+
+			elements[i] = any(n).(T)
 		case kredisJSON:
 			j := kredisJSON(e)
 
@@ -135,7 +142,7 @@ func (l *List[T]) Elements(elements []T) (int, error) {
 		total = total + 1
 	}
 
-	return total, nil
+	return
 }
 
 func (l *List[T]) Remove(elements ...T) error {
@@ -154,9 +161,11 @@ func (l *List[T]) Remove(elements ...T) error {
 // of use??
 
 func (l List[T]) Prepend(elements ...T) (int64, error) {
-	values := newIter(elements).values()
-	llen, err := l.client.LPush(l.ctx, l.key, values...).Result()
+	if len(elements) < 1 {
+		return 0, nil
+	}
 
+	llen, err := l.client.LPush(l.ctx, l.key, newIter(elements).values()...).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -165,14 +174,11 @@ func (l List[T]) Prepend(elements ...T) (int64, error) {
 }
 
 func (l *List[T]) Append(elements ...T) (int64, error) {
-	values := newIter(elements).values()
-
-	if len(values) < 1 {
-		return 0, errors.New("elements is empty")
+	if len(elements) < 1 {
+		return 0, nil
 	}
 
-	llen, err := l.client.RPush(l.ctx, l.key, values...).Result()
-
+	llen, err := l.client.RPush(l.ctx, l.key, newIter(elements).values()...).Result()
 	if err != nil {
 		return 0, err
 	}
@@ -189,3 +195,6 @@ func (l *List[T]) Clear() error {
 
 	return nil
 }
+
+// TODO add function last(n = 1) ??
+// https://github.com/rails/kredis/blob/2ccc5c6bf59e5d38870de45a03e9491a3dc8c397/lib/kredis/types/list.rb#L32-L34

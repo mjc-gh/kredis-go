@@ -6,8 +6,8 @@ import (
 
 type ScalarTime struct{ Proxy }
 
-func NewTime(key string, options Options) (*ScalarTime, error) {
-	proxy, err := NewProxy(key, options)
+func NewTime(key string, opts ...ProxyOption) (*ScalarTime, error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -16,8 +16,8 @@ func NewTime(key string, options Options) (*ScalarTime, error) {
 	return &ScalarTime{Proxy: *proxy}, nil
 }
 
-func NewTimeWithDefault(key string, options Options, defaultValue time.Time) (s *ScalarTime, err error) {
-	proxy, err := NewProxy(key, options)
+func NewTimeWithDefault(key string, defaultValue time.Time, opts ...ProxyOption) (s *ScalarTime, err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}

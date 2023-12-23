@@ -6,8 +6,8 @@ import (
 
 type ScalarBool struct{ Proxy }
 
-func NewBool(key string, options Options) (*ScalarBool, error) {
-	proxy, err := NewProxy(key, options)
+func NewBool(key string, opts ...ProxyOption) (*ScalarBool, error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -15,8 +15,8 @@ func NewBool(key string, options Options) (*ScalarBool, error) {
 	return &ScalarBool{Proxy: *proxy}, err
 }
 
-func NewBoolWithDefault(key string, options Options, defaultValue bool) (s *ScalarBool, err error) {
-	proxy, err := NewProxy(key, options)
+func NewBoolWithDefault(key string, defaultValue bool, opts ...ProxyOption) (s *ScalarBool, err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}

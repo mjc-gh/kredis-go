@@ -1,11 +1,13 @@
 package kredis
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ScalarInteger struct{ Proxy }
 
-func NewInteger(key string, options Options) (*ScalarInteger, error) {
-	proxy, err := NewProxy(key, options)
+func NewInteger(key string, opts ...ProxyOption) (*ScalarInteger, error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -14,8 +16,8 @@ func NewInteger(key string, options Options) (*ScalarInteger, error) {
 	return &ScalarInteger{Proxy: *proxy}, err
 }
 
-func NewIntegerWithDefault(key string, options Options, defaultValue int) (s *ScalarInteger, err error) {
-	proxy, err := NewProxy(key, options)
+func NewIntegerWithDefault(key string, defaultValue int, opts ...ProxyOption) (s *ScalarInteger, err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}

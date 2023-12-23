@@ -2,8 +2,8 @@ package kredis
 
 type ScalarJSON struct{ Proxy }
 
-func NewJSON(key string, options Options) (*ScalarJSON, error) {
-	proxy, err := NewProxy(key, options)
+func NewJSON(key string, opts ...ProxyOption) (*ScalarJSON, error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -12,8 +12,8 @@ func NewJSON(key string, options Options) (*ScalarJSON, error) {
 	return &ScalarJSON{Proxy: *proxy}, nil
 }
 
-func NewJSONWithDefault(key string, options Options, defaultValue *kredisJSON) (s *ScalarJSON, err error) {
-	proxy, err := NewProxy(key, options)
+func NewJSONWithDefault(key string, defaultValue *kredisJSON, opts ...ProxyOption) (s *ScalarJSON, err error) {
+	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}
