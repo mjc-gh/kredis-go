@@ -12,11 +12,28 @@ func NewString(key string, options Options) (*ScalarString, error) {
 	return &ScalarString{Proxy: *proxy}, err
 }
 
+func NewStringWithDefault(key string, options Options, defaultValue string) (s *ScalarString, err error) {
+	proxy, err := NewProxy(key, options)
+	if err != nil {
+		return
+	}
+
+	s = &ScalarString{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		return s.SetValue(defaultValue)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 func (s *ScalarString) Value() string {
 	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
-		return s.DefaultValue()
+		return ""
 	}
 
 	return *val
@@ -34,13 +51,4 @@ func (s *ScalarString) ValueResult() (*string, error) {
 
 func (s *ScalarString) SetValue(v string) error {
 	return s.client.Set(s.ctx, s.key, v, s.expiresIn).Err()
-}
-
-func (s *ScalarString) DefaultValue() string {
-	switch s.defaultValue.(type) {
-	case string:
-		return s.defaultValue.(string)
-	default:
-		return ""
-	}
 }

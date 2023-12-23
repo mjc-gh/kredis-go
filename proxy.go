@@ -2,9 +2,7 @@ package kredis
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,11 +12,10 @@ import (
 // https://redis.uptrace.dev/guide/go-redis-pipelines.html#pipelines
 
 type Proxy struct {
-	ctx          context.Context
-	client       *redis.Client
-	key          string
-	expiresIn    time.Duration
-	defaultValue any // TODO deprecate this field
+	ctx       context.Context
+	client    *redis.Client
+	key       string
+	expiresIn time.Duration
 }
 
 func NewProxy(key string, options Options) (*Proxy, error) {
@@ -34,16 +31,30 @@ func NewProxy(key string, options Options) (*Proxy, error) {
 		key = fmt.Sprintf("%s:%s", *namespace, key)
 	}
 
-	if reflect.ValueOf(options.DefaultValue).Kind() == reflect.Ptr {
-		return nil, errors.New("default value cannot be a pointer")
-	}
-
 	return &Proxy{
 		// TODO figure out the best way to handle context
-		ctx:          context.TODO(),
-		client:       client,
-		key:          key,
-		expiresIn:    duration,
-		defaultValue: options.DefaultValue,
+		ctx:       context.TODO(),
+		client:    client,
+		key:       key,
+		expiresIn: duration,
 	}, nil
+}
+
+func (p *Proxy) watch(setter func() error) error {
+	err := p.client.Watch(p.ctx, func(tx *redis.Tx) error {
+		n, err := tx.Exists(p.ctx, p.key).Result()
+		fmt.Println(n, err)
+		if err != nil {
+			return err
+		} else if n > 0 { // already exists
+			return nil
+		}
+
+		return setter()
+	}, p.key)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

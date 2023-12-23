@@ -1,9 +1,8 @@
 package kredis
 
 type Options struct {
-	Config       *string
-	ExpiresIn    string
-	DefaultValue any // TODO deprecate this field
+	Config    *string
+	ExpiresIn string
 }
 
 func (o *Options) GetConfig() string {

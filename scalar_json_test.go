@@ -21,10 +21,19 @@ func (s *KredisTestSuite) TestNewJSON() {
 
 func (s *KredisTestSuite) TestNewJSONWithDefaultValue() {
 	kjson := NewKredisJSON(`{"key":"default"}`)
-	k, e := NewJSON("foo", Options{DefaultValue: *kjson})
+	kjson2 := NewKredisJSON(`{"k2":"v2"}`)
+	k, e := NewJSONWithDefault("foo", Options{}, kjson)
 
 	s.NoError(e)
 	s.Equal(*kjson, k.Value())
+
+	k, e = NewJSONWithDefault("bar", Options{}, kjson2)
+	s.NoError(e)
+	s.Equal(*kjson2, k.Value())
+
+	k, e = NewJSONWithDefault("bar", Options{}, kjson)
+	s.NoError(e)
+	s.Equal(*kjson2, k.Value())
 }
 
 func TestScalarJSONUnmarshal(t *testing.T) {

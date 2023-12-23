@@ -2,15 +2,12 @@ package kredis
 
 import (
 	"fmt"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type ScalarBool struct{ Proxy }
 
 func NewBool(key string, options Options) (*ScalarBool, error) {
 	proxy, err := NewProxy(key, options)
-
 	if err != nil {
 		return nil, err
 	}
@@ -18,28 +15,21 @@ func NewBool(key string, options Options) (*ScalarBool, error) {
 	return &ScalarBool{Proxy: *proxy}, err
 }
 
-func NewBoolWithDefault(key string, options Options, defaultValue bool) (*ScalarBool, error) {
-	s, err := NewBool(key, options)
+func NewBoolWithDefault(key string, options Options, defaultValue bool) (s *ScalarBool, err error) {
+	proxy, err := NewProxy(key, options)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	// set default value with a transaction
-	err = s.client.Watch(s.ctx, func(tx *redis.Tx) error {
-		n, err := tx.Exists(s.ctx, s.key).Result()
-		if err != nil {
-			return err
-		} else if n > 0 { // already exists
-			return nil
-		}
-
+	s = &ScalarBool{Proxy: *proxy}
+	err = proxy.watch(func() error {
 		return s.SetValue(defaultValue)
-	}, key)
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return s, nil
+	return
 }
 
 func (s *ScalarBool) Value() bool {

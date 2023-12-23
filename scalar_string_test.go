@@ -13,8 +13,16 @@ func (s *KredisTestSuite) TestNewString() {
 }
 
 func (s *KredisTestSuite) TestNewStringWithDefaultValue() {
-	k, e := NewString("foo", Options{DefaultValue: "bar"})
+	k, e := NewStringWithDefault("foo", Options{}, "bar")
 
 	s.NoError(e)
 	s.Equal("bar", k.Value())
+
+	k, e = NewStringWithDefault("bar", Options{}, "baz")
+	s.NoError(e)
+	s.Equal("baz", k.Value())
+
+	k, e = NewStringWithDefault("bar", Options{}, "quix")
+	s.NoError(e)
+	s.Equal("baz", k.Value())
 }

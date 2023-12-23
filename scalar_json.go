@@ -12,12 +12,29 @@ func NewJSON(key string, options Options) (*ScalarJSON, error) {
 	return &ScalarJSON{Proxy: *proxy}, nil
 }
 
+func NewJSONWithDefault(key string, options Options, defaultValue *kredisJSON) (s *ScalarJSON, err error) {
+	proxy, err := NewProxy(key, options)
+	if err != nil {
+		return
+	}
+
+	s = &ScalarJSON{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		return s.SetValue(defaultValue)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 // TODO should this be returning a pointer instead struct value itself??
 func (s *ScalarJSON) Value() kredisJSON {
 	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
-		return s.DefaultValue()
+		return kredisJSON{}
 	}
 
 	return *val
@@ -37,13 +54,4 @@ func (s *ScalarJSON) ValueResult() (*kredisJSON, error) {
 
 func (s *ScalarJSON) SetValue(v *kredisJSON) error {
 	return s.client.Set(s.ctx, s.key, string(*v), s.expiresIn).Err()
-}
-
-func (s *ScalarJSON) DefaultValue() kredisJSON {
-	switch s.defaultValue.(type) {
-	case kredisJSON:
-		return s.defaultValue.(kredisJSON)
-	default:
-		return kredisJSON{}
-	}
 }

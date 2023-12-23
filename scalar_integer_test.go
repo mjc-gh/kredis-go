@@ -21,7 +21,7 @@ func (s *KredisTestSuite) TestScalarInteger() {
 }
 
 func (s *KredisTestSuite) TestScalarIntegerWithDefaultValue() {
-	k, e := NewInteger("foo", Options{DefaultValue: 5678})
+	k, e := NewIntegerWithDefault("foo", Options{}, 5678)
 
 	s.NoError(e)
 	s.Equal(5678, k.Value())
@@ -35,4 +35,8 @@ func (s *KredisTestSuite) TestScalarIntegerBadConnection() {
 
 	s.Error(e)
 	s.Empty(k.Value())
+
+	k, e = NewIntegerWithDefault("foo", Options{Config: &cfg}, -1)
+	s.Error(e)
+	s.Nil(k)
 }

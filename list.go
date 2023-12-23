@@ -25,6 +25,42 @@ func NewBoolList(key string, options Options) (*List[bool], error) {
 	return &List[bool]{Proxy: *proxy}, nil
 }
 
+func NewBoolListWithDefault(key string, options Options, defaultElements []bool) (l *List[bool], err error) {
+	proxy, err := NewProxy(key, options)
+	if err != nil {
+		return
+	}
+
+	l = &List[bool]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+func NewIntListWithDefault(key string, options Options, defaultElements []int) (l *List[int], err error) {
+	proxy, err := NewProxy(key, options)
+	if err != nil {
+		return
+	}
+
+	l = &List[int]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 func NewIntegerList(key string, options Options) (*List[int], error) {
 	proxy, err := NewProxy(key, options)
 
@@ -68,7 +104,7 @@ func NewJSONList(key string, options Options) (*List[kredisJSON], error) {
 func (l *List[T]) Elements(elements []T) (int, error) {
 	var total int
 
-	lrange, err := l.client.LRange(l.ctx, l.key, 0, -1).Result()
+	lrange, err := l.client.LRange(l.ctx, l.key, 0, len(elements)).Result()
 
 	if err != nil {
 		return total, err

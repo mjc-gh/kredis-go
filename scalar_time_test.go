@@ -22,9 +22,18 @@ func (s *KredisTestSuite) TestNewTime() {
 
 func (s *KredisTestSuite) TestNewTimeWithDefaultValue() {
 	yesterday := time.Now().Add(-24 * time.Hour)
+	now := time.Now()
 
-	k, e := NewTime("t", Options{DefaultValue: yesterday})
+	k, e := NewTimeWithDefault("t1", Options{}, yesterday)
 
 	s.NoError(e)
-	s.Equal(yesterday, k.Value())
+	s.Equal(yesterday.Round(0), k.Value())
+
+	k, e = NewTimeWithDefault("t2", Options{}, now)
+	s.NoError(e)
+	s.Equal(now.Round(0), k.Value())
+
+	k, e = NewTimeWithDefault("t2", Options{}, yesterday)
+	s.NoError(e)
+	s.Equal(now.Round(0), k.Value())
 }

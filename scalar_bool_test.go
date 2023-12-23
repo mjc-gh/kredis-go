@@ -43,7 +43,13 @@ func (s *KredisTestSuite) TestScalarBoolWithDefaultValue() {
 func (s *KredisTestSuite) TestScalarBoolBadConnection() {
 	cfg := "badconn"
 
-	k, e := NewBoolWithDefault("foo", Options{Config: &cfg}, true)
+	k, _ := NewBool("foo", Options{Config: &cfg})
+	_, e := k.ValueResult()
+
+	s.Error(e)
+	s.Empty(k.Value())
+
+	k, e = NewBoolWithDefault("foo", Options{Config: &cfg}, true)
 	s.Error(e)
 	s.Nil(k)
 }

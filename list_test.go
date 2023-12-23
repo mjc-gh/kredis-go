@@ -64,6 +64,28 @@ func (s *KredisTestSuite) TestBoolList() {
 	s.Equal([]bool{false, false}, elems)
 }
 
+func (s *KredisTestSuite) TestBoolListWithDefault() {
+	elems := make([]bool, 3)
+
+	l, e := NewBoolListWithDefault("bool_list_default", Options{}, []bool{true, false, true})
+	s.NoError(e)
+
+	n, e := l.Elements(elems)
+	s.NoError(e)
+	s.Equal(3, n)
+	s.Equal([]bool{true, false, true}, elems)
+
+	l2, e := NewBoolListWithDefault("bool_list_default", Options{}, []bool{false, false, false, false})
+	s.NoError(e)
+
+	elems = make([]bool, 3)
+	n, e = l2.Elements(elems)
+	s.NoError(e)
+	s.Equal(3, n)
+	s.Equal([]bool{true, false, true}, elems)
+}
+
+// TODO fix flaky tests with time values
 func (s *KredisTestSuite) TestTimeList() {
 	elems := make([]time.Time, 2)
 
