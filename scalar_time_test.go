@@ -19,7 +19,7 @@ func (s *KredisTestSuite) TestNewTime() {
 
 	// The canonical way to strip a monotonic clock reading is to use t =
 	// t.Round(0).
-	s.Equal(now.Round(0), k.Value())
+	s.Equal(now.Round(0), k.Value().Local())
 }
 
 func (s *KredisTestSuite) TestNewTimeWithDefaultValue() {
@@ -29,15 +29,15 @@ func (s *KredisTestSuite) TestNewTimeWithDefaultValue() {
 	k, e := NewTimeWithDefault("t1", yesterday)
 
 	s.NoError(e)
-	s.Equal(yesterday.Round(0), k.Value())
+	s.Equal(yesterday.Round(0), k.Value().Local())
 
 	k, e = NewTimeWithDefault("t2", now)
 	s.NoError(e)
-	s.Equal(now.Round(0), k.Value())
+	s.Equal(now.Round(0), k.Value().Local())
 
 	k, e = NewTimeWithDefault("t2", yesterday)
 	s.NoError(e)
-	s.Equal(now.Round(0), k.Value())
+	s.Equal(now.Round(0), k.Value().Local())
 }
 
 func (s *KredisTestSuite) TestScalarTimeExpiresIn() {
