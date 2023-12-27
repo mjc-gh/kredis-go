@@ -156,7 +156,7 @@ func (s *KredisTestSuite) TestTimeList() {
 	s.NoError(err)
 	s.Equal(2, n)
 
-	s.Equal([]time.Time{t1.Round(0), t2.Round(0)}, elems)
+	s.Equal([]time.Time{t2.Round(0), t1.Round(0)}, elems)
 }
 
 func (s *KredisTestSuite) TestTimeListWithDefault() {
