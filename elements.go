@@ -16,10 +16,9 @@ func newIter[T KredisTyped](elements []T) iterator[T] {
 	return &iter[T]{elements}
 }
 
-func (i *iter[T]) next() (T, bool) {
+func (i *iter[T]) next() (val T, ok bool) {
 	if len(i.elements) == 0 {
-		var zero T
-		return zero, false
+		return // no elements - return empty values
 	}
 
 	elem := i.elements[0]

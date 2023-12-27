@@ -6,17 +6,7 @@ A port of [Rails' Kredis](https://github.com/rails/kredis) for Go.
 structures around a single key, so you can interact with them as
 coherent objects rather than isolated procedural commands.
 
-## Example
-
-```go
-k, e := NewInteger("foo", Options{})
-k.SetValue(1234)
-
-// prints: 1234
-fmt.Println(k.Value())
-```
-
-### Lists
+## Lists
 
 ```go
 l := NewIntegerList("users")
@@ -53,7 +43,7 @@ n := strs.Length()          // LLEN lines
 // 2
 ```
 
-### Slots
+## Slots
 
 ```go
 slot := NewSlot("slot", 3)
@@ -85,7 +75,7 @@ slot.Reserve(func () { fmt.Println("called") })
 // true
 ```
 
-### Scalar types
+## Scalar types
 
 - `NewBool` and `NewBoolWithDefault`
 - `NewInteger` and `NewIntegerWithDefault`
@@ -93,23 +83,29 @@ slot.Reserve(func () { fmt.Println("called") })
 - `NewTime` and `NewTimeWithDefault`
 - `NewJSON` and `NewJSONWithDefault`
 
+```go
+k, err := NewInteger("myint", Options{})
+err = k.SetValue(1024)  // SET myint 1024
+// nil
+k.Value()               // GET myint
+// 1024
+```
+
 ## TODO
 
 Implement additional Kredis data structures
 
-- enum
-- counters
-- flags
 - Collections
     - sets
     - unique lists
     - hashs
-- scalar types
-    - float type (lists and other collections)
+- other scalar types
+    - float type
+        - on lists and other collections
     - some sort of map type (serialized as json) ??
-- debug logging
-    - use zerolog
-    - like Ruby, log redis commands in "development" mode
+- document all types in README
+- test commands with some sort of test env `ProcessHook` for redis
+    clients
 - [pipelining](https://redis.uptrace.dev/guide/go-redis-pipelines.html) ??
     - with only kredis commands?
     - with a shared redis client?

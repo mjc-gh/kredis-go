@@ -45,6 +45,14 @@ func WithExpiry(expires string) ProxyOption {
 	}
 }
 
+// TODO WithContext ProxyOption for providing a user-defined context.Context for the Proxy
+// struct and thus the redis client commands
+
+// func WithContext(ctx context.Context) ProxyOption {
+//   return func(o *ProxyOptions) {
+//   }
+// }
+
 // For range options (list, unique lists)
 
 type RangeOptions struct {
