@@ -47,11 +47,9 @@ func (s *ScalarJSON) ValueResult() (*kredisJSON, error) {
 		return nil, err
 	}
 
-	kjson := kredisJSON(val)
-
-	return &kjson, nil
+	return NewKredisJSON(val), nil
 }
 
 func (s *ScalarJSON) SetValue(v *kredisJSON) error {
-	return s.client.Set(s.ctx, s.key, string(*v), s.expiresIn).Err()
+	return s.client.Set(s.ctx, s.key, string(v.s), s.expiresIn).Err()
 }

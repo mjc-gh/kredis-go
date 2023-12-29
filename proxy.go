@@ -45,7 +45,6 @@ func NewProxy(key string, opts ...ProxyOption) (*Proxy, error) {
 func (p *Proxy) watch(setter func() error) error {
 	err := p.client.Watch(p.ctx, func(tx *redis.Tx) error {
 		n, err := tx.Exists(p.ctx, p.key).Result()
-		fmt.Println(n, err)
 		if err != nil {
 			return err
 		} else if n > 0 { // already exists

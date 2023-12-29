@@ -86,27 +86,13 @@ var argsColor = color.New(color.FgGreen).SprintFunc()
 
 func (c *cmdLoggingHook) ProcessHook(hook redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
-		var key string
-		var args []string
-
-		cmdArgs := cmd.Args()
-		name := cmdColor(strings.ToUpper(cmd.Name()))
-
-		if len(cmdArgs) > 1 {
-			key = keyColor(cmdArgs[1].(string))
-		}
-
-		if len(cmdArgs) > 2 {
-			for _, cmdArg := range cmdArgs[2:] {
-				args = append(args, argsColor(fmt.Sprintf("%v", cmdArg)))
-			}
-		}
+		name, key, args := cmdLogParts(cmd)
 
 		start := time.Now()
 		err := hook(ctx, cmd)
 		dur := float64(time.Since(start).Microseconds()) / 1000.0
 
-		fmt.Printf("Kredis (%.1fms) %s %s %s\n", dur, name, key, strings.Join(args, " "))
+		fmt.Printf("Kredis (%.1fms) %s %s %s\n", dur, name, key, args)
 
 		return err
 	}
@@ -114,6 +100,46 @@ func (c *cmdLoggingHook) ProcessHook(hook redis.ProcessHook) redis.ProcessHook {
 
 func (c *cmdLoggingHook) ProcessPipelineHook(hook redis.ProcessPipelineHook) redis.ProcessPipelineHook {
 	return func(ctx context.Context, cmds []redis.Cmder) error {
-		return hook(ctx, cmds)
+
+		start := time.Now()
+		err := hook(ctx, cmds)
+		dur := float64(time.Since(start).Microseconds()) / 1000.0
+
+		for idx, cmd := range cmds {
+			name, key, args := cmdLogParts(cmd)
+
+			if idx == len(cmds)-1 {
+				fmt.Printf("Kredis (%.1fms) %s %s %s\n", dur, name, key, args)
+			} else {
+				fmt.Printf("Kredis (tx)    %s %s %s\n", name, key, args)
+			}
+		}
+
+		return err
 	}
+}
+
+func cmdLogParts(cmd redis.Cmder) (string, string, string) {
+	var key string
+	var args []string
+
+	cmdArgs := cmd.Args()
+	name := cmdColor(strings.ToUpper(cmd.Name()))
+
+	if len(cmdArgs) > 1 {
+		switch cmdArgs[1].(type) {
+		case int64:
+			key = keyColor(cmdArgs[1].(int64))
+		default:
+			key = keyColor(cmdArgs[1].(string))
+		}
+	}
+
+	if len(cmdArgs) > 2 {
+		for _, cmdArg := range cmdArgs[2:] {
+			args = append(args, argsColor(fmt.Sprintf("%v", cmdArg)))
+		}
+	}
+
+	return name, key, strings.Join(args, " ")
 }

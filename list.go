@@ -1,7 +1,6 @@
 package kredis
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -166,48 +165,21 @@ func NewJSONListWithDefault(key string, defaultElements []kredisJSON, opts ...Pr
 
 // generic List functions
 
+// NOTE we're using Do() for the "LRANGE" command instead of LRange() as to
+// seemingly avoid an []string allocation from StringSliceCmd#Result()
 func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int, err error) {
 	rangeOptions := RangeOptions{0}
 	for _, opt := range opts {
 		opt(&rangeOptions)
 	}
 
-	// TODO should we read all elements?
 	stop := rangeOptions.start + int64(len(elements))
-	lrange, err := l.client.LRange(l.ctx, l.key, rangeOptions.start, stop).Result()
+	slice, err := l.client.Do(l.ctx, "lrange", l.key, rangeOptions.start, stop).Slice()
 	if err != nil {
 		return
 	}
 
-	for i, e := range lrange {
-		if i == len(elements) {
-			break
-		}
-
-		switch any(elements[i]).(type) {
-		case bool:
-			b, _ := strconv.ParseBool(e)
-
-			elements[i] = any(b).(T)
-		case int:
-			n, _ := strconv.Atoi(e)
-
-			elements[i] = any(n).(T)
-		case kredisJSON:
-			j := kredisJSON(e)
-
-			elements[i] = any(j).(T)
-		case time.Time:
-			t, _ := time.Parse(time.RFC3339Nano, e)
-
-			elements[i] = any(t).(T)
-		default:
-			elements[i] = any(e).(T)
-		}
-
-		total = total + 1
-	}
-
+	total = copyCmdSliceTo(slice, elements)
 	return
 }
 
