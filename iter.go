@@ -1,9 +1,14 @@
 package kredis
 
+import (
+	"github.com/redis/go-redis/v9"
+)
+
 // Loosely based on https://github.com/polyfloyd/go-iterator
 type iterator[T KredisTyped] interface {
 	next() (T, bool)
 	values() []interface{}
+	valuesWithScoring(scoreable, bool) []redis.Z
 	unique() []interface{}
 	uniqueMap() map[T]struct{}
 }
@@ -32,6 +37,27 @@ func (i *iter[T]) values() []interface{} {
 
 	for idx, e := range i.elements {
 		values[idx] = typeToInterface(e)
+	}
+
+	return values
+}
+
+type scoreable interface {
+	prependScore(int) float64
+	appendScore(int) float64
+}
+
+func (i *iter[T]) valuesWithScoring(scorer scoreable, prepended bool) []redis.Z {
+	values := make([]redis.Z, len(i.elements))
+
+	for idx, e := range i.elements {
+		if prepended {
+			values[idx].Score = scorer.prependScore(idx)
+		} else {
+			values[idx].Score = scorer.appendScore(idx)
+		}
+
+		values[idx].Member = typeToInterface(e)
 	}
 
 	return values

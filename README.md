@@ -96,14 +96,13 @@ k.Value()               // GET myint
 Implement additional Kredis data structures
 
 - Collections
-    - sets
-    - unique lists
     - hashs
+    - limit setter for Set and OrderedSet
+- document all types in README
 - other scalar types
     - float type
         - on lists and other collections
     - some sort of map type (serialized as json) ??
-- document all types in README
 - test commands with some sort of test env `ProcessHook` for redis
     clients
 - [pipelining](https://redis.uptrace.dev/guide/go-redis-pipelines.html) ??

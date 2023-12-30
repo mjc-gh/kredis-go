@@ -1,7 +1,6 @@
 package kredis
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -243,7 +242,6 @@ func (l *UniqueList[T]) update(elements []T, updateFn func(redis.Pipeliner, []in
 		pipe.LRem(l.ctx, l.key, 0, u)
 	}
 
-	fmt.Println(l.limit)
 	llen := updateFn(pipe, uniq)
 	if l.limit > 0 {
 		pipe.LTrim(l.ctx, l.key, -l.limit, -1)
