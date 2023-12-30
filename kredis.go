@@ -19,6 +19,7 @@ type KredisTyped interface {
 	~bool | ~int | ~string | kredisJSON | time.Time
 }
 
+// kredisJSON is a small struct wrapper for dealing with JSON strings
 func NewKredisJSON(jsonStr string) *kredisJSON {
 	var kj kredisJSON = kredisJSON{jsonStr}
 
@@ -38,6 +39,7 @@ func (kj *kredisJSON) Unmarshal(data *interface{}) error {
 	return nil
 }
 
+// convert an interface{} value to a KredisTyped value
 func typeToInterface[T KredisTyped](t T) interface{} {
 	switch any(t).(type) {
 	case time.Time:
@@ -49,9 +51,44 @@ func typeToInterface[T KredisTyped](t T) interface{} {
 	}
 }
 
+// convert a string value to a KredisTyped value
+func stringToTyped[T KredisTyped](value string, typed *T) (T, bool) {
+	switch any(*typed).(type) {
+	case bool:
+		b, err := strconv.ParseBool(value)
+		if err != nil {
+			return any(false).(T), false
+		}
+		return any(b).(T), true
+
+	case int:
+		n, err := strconv.Atoi(value)
+		if err != nil {
+			return any(0).(T), false
+		}
+		return any(n).(T), true
+
+	case time.Time:
+		t, err := time.Parse(time.RFC3339Nano, value)
+		if err != nil {
+			return any(time.Time{}).(T), false
+		}
+		return any(t).(T), true
+
+	case string:
+		return any(value).(T), true
+
+	case kredisJSON:
+		return any(NewKredisJSON(value)).(T), true
+	}
+
+	return any(*typed).(T), false
+}
+
+// redis.StringCmd has most of the conversion functions we need for converting
+// to a KredisTyped. this is only used with Set or Hash.
 func stringCmdToTyped[T KredisTyped](cmd *redis.StringCmd, typed *T) (T, bool) {
 	if cmd.Err() == redis.Nil {
-		// return any(*typed).(T), false
 		goto Empty
 	}
 
@@ -88,6 +125,8 @@ Empty:
 	return any(*typed).(T), false
 }
 
+// used in most collection types for copying a slice of interfaces to a slice
+// of KredisTyped.
 func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) int {
 	var total int
 
@@ -117,7 +156,7 @@ func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) int {
 			dst[i] = any(e).(T)
 		}
 
-		total = total + 1
+		total += 1
 	}
 
 	return total

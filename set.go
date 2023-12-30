@@ -205,9 +205,7 @@ func (s *Set[T]) Size() int64 {
 }
 
 func (s *Set[T]) Take() (T, bool) {
-	cmd := s.client.SPop(s.ctx, s.key)
-
-	return stringCmdToTyped[T](cmd, s.typed)
+	return stringCmdToTyped[T](s.client.SPop(s.ctx, s.key), s.typed)
 }
 
 // TODO func (s *Set[T]) TakeN(memebers []T) (error)

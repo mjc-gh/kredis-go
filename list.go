@@ -10,9 +10,6 @@ type List[T KredisTyped] struct {
 	Proxy
 }
 
-// TODO finish generic Default factories
-// TODO use expiresIn
-
 // List[bool] type
 
 func NewBoolList(key string, opts ...ProxyOption) (*List[bool], error) {

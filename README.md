@@ -96,8 +96,14 @@ k.Value()               // GET myint
 Implement additional Kredis data structures
 
 - Collections
-    - hashs
     - limit setter for Set and OrderedSet
+    - Clear()/Remove() return number of elements/entries/members
+        removed? (we only return an error usually now)
+- use `expiresIn` when possible (lists, sets, and other collections)
+- make API more succinct
+    - return `int64` for any type of collection size
+    - do not surface redis.Nil error when a collection is nil (return an
+        empty type instead?)
 - document all types in README
 - other scalar types
     - float type

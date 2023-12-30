@@ -1,6 +1,8 @@
 package kredis
 
-func (s *KredisTestSuite) TestOrderedSet() {
+import "time"
+
+func (s *KredisTestSuite) TestStringOrderedSet() {
 	oset, e := NewStringOrderedSet("ints", 3)
 	s.NoError(e)
 
@@ -26,4 +28,19 @@ func (s *KredisTestSuite) TestOrderedSet() {
 
 	s.NoError(oset.Clear())
 	s.Equal(int64(0), oset.Size())
+}
+
+func (s *KredisTestSuite) TestTimeOrderedSet() {
+	oset, e := NewTimeOrderedSet("times", 3)
+	s.NoError(e)
+
+	t1 := time.Now()
+	t2 := time.Date(2021, 8, 28, 23, 0, 0, 0, time.UTC)
+
+	add, rm, e := oset.Append(t1)
+	s.NoError(e)
+	s.Equal(int64(1), add)
+	s.Equal(int64(0), rm)
+	s.True(oset.Includes(t1))
+	s.False(oset.Includes(t2))
 }
