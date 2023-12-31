@@ -6,11 +6,15 @@ func (s *KredisTestSuite) TestBoolSet() {
 	set, e := NewBoolSet("bools")
 	s.NoError(e)
 
+	members, e := set.Members()
+	s.NoError(e)
+	s.Empty(members)
+
 	n, e := set.Add(true, false)
 	s.NoError(e)
 	s.Equal(int64(2), n)
 
-	members, e := set.Members()
+	members, e = set.Members()
 	s.NoError(e)
 	s.Contains(members, true)
 	s.Contains(members, false)

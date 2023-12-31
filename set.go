@@ -210,9 +210,8 @@ func (s *Set[T]) Take() (T, bool) {
 
 // TODO func (s *Set[T]) TakeN(memebers []T) (error)
 
-func (s *Set[T]) Clear() (err error) {
-	_, err = s.client.Del(s.ctx, s.key).Result()
-	return
+func (s *Set[T]) Clear() error {
+	return s.client.Del(s.ctx, s.key).Err()
 }
 
 func (s *Set[T]) Sample(members []T) (total int64, err error) {

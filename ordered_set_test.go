@@ -34,6 +34,10 @@ func (s *KredisTestSuite) TestTimeOrderedSet() {
 	oset, e := NewTimeOrderedSet("times", 3)
 	s.NoError(e)
 
+	members, e := oset.Members()
+	s.NoError(e)
+	s.Empty(members)
+
 	t1 := time.Now()
 	t2 := time.Date(2021, 8, 28, 23, 0, 0, 0, time.UTC)
 

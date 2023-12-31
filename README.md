@@ -96,17 +96,14 @@ k.Value()               // GET myint
 Implement additional Kredis data structures
 
 - new `Limiter` counter-based type
-- use `expiresIn` when possible (lists, sets, and other collections)
-- make API more succinct
-    - Clear()/Remove() return number of elements/entries/members
-        removed? (we only return an error usually now)
-    - do not surface redis.Nil error when a collection is nil (return an
-        empty type instead?)
-- document all types in README
 - other scalar types
     - float type
         - on lists and other collections
     - some sort of map type (serialized as json) ??
+- make API more succinct
+    - always use `expiresIn` when possible (lists, sets, and other collections). or refactor `ProxyOption` to not allow it for certain collection types?
+- document all types in README
+- github test matrix with multiple versions of Go and Redis
 - test commands with some sort of test env `ProcessHook` for redis
     clients
 - [pipelining](https://redis.uptrace.dev/guide/go-redis-pipelines.html) ??

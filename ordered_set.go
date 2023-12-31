@@ -215,9 +215,8 @@ func (s *OrderedSet[T]) Prepend(members ...T) (added int64, removed int64, err e
 	return
 }
 
-func (s *OrderedSet[T]) Remove(members ...T) (total int64, err error) {
-	total, err = s.client.ZRem(s.ctx, s.key, newIter(members).values()...).Result()
-	return
+func (s *OrderedSet[T]) Remove(members ...T) (int64, error) {
+	return s.client.ZRem(s.ctx, s.key, newIter(members).values()...).Result()
 }
 
 func (s *OrderedSet[T]) Includes(member T) bool {

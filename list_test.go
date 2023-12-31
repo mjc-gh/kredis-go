@@ -32,6 +32,13 @@ func (s *KredisTestSuite) TestStringList() {
 	s.NoError(err)
 	s.Equal(int64(3), n)
 	s.Equal([]string{"y", "x", "a"}, elems)
+
+	s.NoError(l.Remove("x", "a"))
+
+	n, err = l.Elements(elems)
+	s.NoError(err)
+	s.Equal(int64(3), n)
+	s.Equal([]string{"y", "b", "c"}, elems)
 }
 
 func (s *KredisTestSuite) TestStringListWithDefault() {
@@ -74,6 +81,8 @@ func (s *KredisTestSuite) TestIntegerList() {
 	s.NoError(err)
 	s.Equal(int64(3), n)
 	s.Equal([]int{9, 8, 1}, elems)
+
+	s.NoError(l.Clear())
 }
 
 func (s *KredisTestSuite) TestIntegerListWithDefault() {
@@ -135,7 +144,7 @@ func (s *KredisTestSuite) TestTimeList() {
 	elems := make([]time.Time, 2)
 
 	t1 := time.Now()
-	t2 := time.Now()
+	t2 := time.Date(2021, 8, 28, 23, 0, 0, 0, time.Local)
 
 	l, e := NewTimeList("list")
 	s.NoError(e)
@@ -158,6 +167,18 @@ func (s *KredisTestSuite) TestTimeList() {
 
 	s.Equal(t2.Round(0), elems[0].Local())
 	s.Equal(t1.Round(0), elems[1].Local())
+
+	s.NoError(l.Remove(t2))
+
+	n, e = l.Length()
+	s.NoError(e)
+	s.Equal(int64(1), n)
+
+	e = l.Clear()
+	s.NoError(e)
+
+	n, _ = l.Elements(elems)
+	s.Zero(n)
 }
 
 func (s *KredisTestSuite) TestTimeListWithDefault() {
@@ -259,21 +280,6 @@ func (s *KredisTestSuite) TestListLength() {
 	s.Equal(int64(5), n)
 }
 
-func (s *KredisTestSuite) TestListClear() {
-	elems := make([]string, 5)
-
-	l, _ := NewStringList("list")
-	llen, err := l.Append("a", "b", "c")
-	s.NoError(err)
-	s.Equal(int64(3), llen)
-
-	err = l.Clear()
-	s.NoError(err)
-
-	n, _ := l.Elements(elems)
-	s.Zero(n)
-}
-
 func (s *KredisTestSuite) TestListAppendAndPrependWithEmptyElements() {
 	l, _ := NewStringList("list")
 
@@ -284,22 +290,6 @@ func (s *KredisTestSuite) TestListAppendAndPrependWithEmptyElements() {
 	n, e = l.Prepend()
 	s.NoError(e)
 	s.Empty(n)
-}
-
-func (s *KredisTestSuite) TestListRemove() {
-	elems := make([]string, 3)
-
-	l, _ := NewStringList("list")
-	llen, err := l.Append("a", "b", "c", "d", "e")
-	s.NoError(err)
-	s.Equal(int64(5), llen)
-
-	err = l.Remove("b", "d")
-	s.NoError(err)
-
-	n, _ := l.Elements(elems)
-	s.Equal(int64(3), n)
-	s.Equal([]string{"a", "c", "e"}, elems)
 }
 
 func (s *KredisTestSuite) TestListBadConnection() {

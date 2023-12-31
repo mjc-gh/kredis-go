@@ -180,16 +180,15 @@ func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int64, err 
 	return
 }
 
-func (l *List[T]) Remove(elements ...T) error {
-	iter := newIter(elements)
-
-	for val, ok := iter.next(); ok; {
-		l.client.LRem(l.ctx, l.key, 0, val)
-
-		val, ok = iter.next()
+func (l *List[T]) Remove(elements ...T) (err error) {
+	for _, element := range elements {
+		value := typeToInterface(element)
+		if err = l.client.LRem(l.ctx, l.key, 0, value).Err(); err != nil {
+			return
+		}
 	}
 
-	return nil
+	return
 }
 
 // TODO should Prepend and Append return an int not an int64 for greater ease
@@ -222,13 +221,7 @@ func (l *List[T]) Append(elements ...T) (int64, error) {
 }
 
 func (l *List[T]) Clear() error {
-	_, err := l.client.Del(l.ctx, l.key).Result()
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return l.client.Del(l.ctx, l.key).Err()
 }
 
 func (l *List[T]) Length() (llen int64, err error) {

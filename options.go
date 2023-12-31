@@ -34,6 +34,7 @@ func WithConfigName(name string) ProxyOption {
 		o.config = &name
 	}
 }
+
 func WithExpiry(expires string) ProxyOption {
 	return func(o *ProxyOptions) {
 		duration, err := time.ParseDuration(expires)

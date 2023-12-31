@@ -184,16 +184,15 @@ func (l *UniqueList[T]) Elements(elements []T, opts ...RangeOption) (total int64
 	return
 }
 
-func (l *UniqueList[T]) Remove(elements ...T) error {
-	iter := newIter(elements)
-
-	for val, ok := iter.next(); ok; {
-		l.client.LRem(l.ctx, l.key, 0, val)
-
-		val, ok = iter.next()
+func (l *UniqueList[T]) Remove(elements ...T) (err error) {
+	for _, element := range elements {
+		value := typeToInterface(element)
+		if err = l.client.LRem(l.ctx, l.key, 0, value).Err(); err != nil {
+			return
+		}
 	}
 
-	return nil
+	return
 }
 
 func (l UniqueList[T]) Prepend(elements ...T) (int64, error) {
