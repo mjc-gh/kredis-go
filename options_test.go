@@ -6,8 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOptionsGetConfigDefault(t *testing.T) {
-	o := Options{}
+func TestProxyOptionsConfigDefault(t *testing.T) {
+	po := ProxyOptions{}
 
-	assert.Equal(t, "shared", o.GetConfig())
+	assert.Equal(t, "shared", po.Config())
+}
+
+func TestProxyOptionsWithConfigName(t *testing.T) {
+	po := ProxyOptions{}
+	WithConfigName("named")(&po)
+
+	assert.Equal(t, "named", po.Config())
 }

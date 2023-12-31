@@ -1,11 +1,13 @@
 package kredis
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ScalarInteger struct{ Proxy }
 
-func NewInteger(key string, options Options) (*ScalarInteger, error) {
-	proxy, err := NewProxy(key, options)
+func NewInteger(key string, opts ...ProxyOption) (*ScalarInteger, error) {
+	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
@@ -14,11 +16,28 @@ func NewInteger(key string, options Options) (*ScalarInteger, error) {
 	return &ScalarInteger{Proxy: *proxy}, err
 }
 
+func NewIntegerWithDefault(key string, defaultValue int, opts ...ProxyOption) (s *ScalarInteger, err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	s = &ScalarInteger{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		return s.SetValue(defaultValue)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 func (s *ScalarInteger) Value() int {
 	val, err := s.ValueResult()
 
 	if err != nil || val == nil {
-		return s.DefaultValue()
+		return 0
 	}
 
 	return *val
@@ -36,13 +55,4 @@ func (s *ScalarInteger) ValueResult() (*int, error) {
 
 func (s *ScalarInteger) SetValue(v int) error {
 	return s.client.Set(s.ctx, s.key, fmt.Sprintf("%d", v), s.expiresIn).Err()
-}
-
-func (s *ScalarInteger) DefaultValue() int {
-	switch s.defaultValue.(type) {
-	case int:
-		return s.defaultValue.(int)
-	default:
-		return 0
-	}
 }

@@ -12,8 +12,12 @@ type KredisTestSuite struct {
 }
 
 func (suite *KredisTestSuite) SetupTest() {
+	// TODO use a unique namespace for each test (thus potentially enabling
+	// parallel tests)
 	SetConfiguration("shared", "ns", "redis://localhost:6379/2")
 	SetConfiguration("badconn", "ns", "redis://localhost:1234/0")
+
+	SetCommandLogging(true)
 }
 
 func (suite *KredisTestSuite) TearDownTest() {
@@ -36,3 +40,5 @@ func (suite *KredisTestSuite) TearDownTest() {
 func TestKredisTestSuit(t *testing.T) {
 	suite.Run(t, new(KredisTestSuite))
 }
+
+// TODO tests for kredisJSON struct ??
