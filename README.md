@@ -95,6 +95,7 @@ k.Value()               // GET myint
 
 Implement additional Kredis data structures
 
+- new `Limiter` counter-based type
 - use `expiresIn` when possible (lists, sets, and other collections)
 - make API more succinct
     - Clear()/Remove() return number of elements/entries/members
