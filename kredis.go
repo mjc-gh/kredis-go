@@ -127,9 +127,7 @@ Empty:
 
 // used in most collection types for copying a slice of interfaces to a slice
 // of KredisTyped.
-func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) int {
-	var total int
-
+func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) (total int64) {
 	for i, e := range slice {
 		if i == len(dst) {
 			break
@@ -159,5 +157,5 @@ func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) int {
 		total += 1
 	}
 
-	return total
+	return
 }

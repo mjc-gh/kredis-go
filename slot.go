@@ -8,12 +8,12 @@ import (
 
 type Slot struct {
 	Proxy
-	available int
+	available int64
 }
 
 // TODO add expiry support
 
-func NewSlot(key string, available int, opts ...ProxyOption) (*Slot, error) {
+func NewSlot(key string, available int64, opts ...ProxyOption) (*Slot, error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err

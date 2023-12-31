@@ -24,13 +24,13 @@ func (s *KredisTestSuite) TestStringList() {
 
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(5, n)
+	s.Equal(int64(5), n)
 	s.Equal([]string{"y", "x", "a", "b", "c"}, elems)
 
 	elems = make([]string, 3)
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 	s.Equal([]string{"y", "x", "a"}, elems)
 }
 
@@ -42,7 +42,7 @@ func (s *KredisTestSuite) TestStringListWithDefault() {
 	elems := make([]string, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(1, n)
+	s.Equal(int64(1), n)
 	s.Equal([]string{"a"}, elems[0:1])
 }
 
@@ -66,13 +66,13 @@ func (s *KredisTestSuite) TestIntegerList() {
 
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(5, n)
+	s.Equal(int64(5), n)
 	s.Equal([]int{9, 8, 1, 2, 3}, elems)
 
 	elems = make([]int, 3)
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 	s.Equal([]int{9, 8, 1}, elems)
 }
 
@@ -84,7 +84,7 @@ func (s *KredisTestSuite) TestIntegerListWithDefault() {
 	elems := make([]int, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 	s.Equal([]int{5, 7, 9}, elems)
 }
 
@@ -108,13 +108,13 @@ func (s *KredisTestSuite) TestBoolList() {
 
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(5, n)
+	s.Equal(int64(5), n)
 	s.Equal([]bool{false, false, true, false, true}, elems)
 
 	elems = make([]bool, 2)
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(2, n)
+	s.Equal(int64(2), n)
 	s.Equal([]bool{false, false}, elems)
 }
 
@@ -126,7 +126,7 @@ func (s *KredisTestSuite) TestBoolListWithDefault() {
 	elems := make([]bool, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 	s.Equal([]bool{true, false, true}, elems)
 }
 
@@ -154,7 +154,7 @@ func (s *KredisTestSuite) TestTimeList() {
 
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(2, n)
+	s.Equal(int64(2), n)
 
 	s.Equal(t2.Round(0), elems[0].Local())
 	s.Equal(t1.Round(0), elems[1].Local())
@@ -171,7 +171,7 @@ func (s *KredisTestSuite) TestTimeListWithDefault() {
 	elems := make([]time.Time, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(2, n)
+	s.Equal(int64(2), n)
 	s.Equal([]time.Time{t1, t2}, elems[0:2])
 }
 
@@ -200,7 +200,7 @@ func (s *KredisTestSuite) TestJSONList() {
 
 	n, err = l.Elements(elems)
 	s.NoError(err)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 
 	s.Equal([]kredisJSON{*kj_3, *kj_1, *kj_2}, elems)
 
@@ -223,7 +223,7 @@ func (s *KredisTestSuite) TestJSONListWithDefault() {
 	elems := make([]kredisJSON, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(2, n)
+	s.Equal(int64(2), n)
 	s.Equal([]kredisJSON{*kj_1, *kj_2}, elems[0:2])
 }
 
@@ -235,13 +235,13 @@ func (s *KredisTestSuite) TestElementsWithRangeOptions() {
 	elems := make([]int, 6)
 	n, e := l.Elements(elems)
 	s.NoError(e)
-	s.Equal(6, n)
+	s.Equal(int64(6), n)
 	s.Equal([]int{1, 2, 3, 4, 5, 6}, elems)
 
 	elems = make([]int, 2)
 	n, e = l.Elements(elems, WithRangeStart(3))
 	s.NoError(e)
-	s.Equal(2, n)
+	s.Equal(int64(2), n)
 	s.Equal([]int{4, 5}, elems)
 }
 
@@ -298,7 +298,7 @@ func (s *KredisTestSuite) TestListRemove() {
 	s.NoError(err)
 
 	n, _ := l.Elements(elems)
-	s.Equal(3, n)
+	s.Equal(int64(3), n)
 	s.Equal([]string{"a", "c", "e"}, elems)
 }
 

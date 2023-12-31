@@ -43,4 +43,12 @@ func (s *KredisTestSuite) TestTimeOrderedSet() {
 	s.Equal(int64(0), rm)
 	s.True(oset.Includes(t1))
 	s.False(oset.Includes(t2))
+
+	oset.SetLimit(1)
+
+	add, rm, e = oset.Append(t2)
+	s.NoError(e)
+	s.Equal(int64(1), add)
+	s.Equal(int64(1), rm)
+	s.True(oset.Includes(t2))
 }

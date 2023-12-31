@@ -26,7 +26,7 @@ func (s *KredisTestSuite) TestBoolSet() {
 	members = make([]bool, 1)
 	m, e := set.Sample(members)
 	s.NoError(e)
-	s.Equal(1, m)
+	s.Equal(int64(1), m)
 	s.Equal([]bool{true}, members)
 
 	t, ok := set.Take()
@@ -60,7 +60,7 @@ func (s *KredisTestSuite) TestIntegerSet() {
 	set.Add(1)
 	t, ok := set.Take()
 	s.True(ok)
-	s.Equal(1, t)
+	s.Equal(int(1), t)
 
 	t, ok = set.Take()
 	s.False(ok)
@@ -77,7 +77,7 @@ func (s *KredisTestSuite) TestStringSet() {
 	members := make([]string, 5)
 	m, e := set.Sample(members)
 	s.NoError(e)
-	s.Equal(3, m)
+	s.Equal(int64(3), m)
 	s.Contains(members, "a")
 	s.Contains(members, "b")
 	s.Contains(members, "c")

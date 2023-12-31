@@ -13,14 +13,14 @@ func init() {
 // Backed by Sorted Sets in redis
 type OrderedSet[T KredisTyped] struct {
 	Proxy
-	limit int64
+	limit uint64
 	base  time.Time
 	typed *T
 }
 
 // OrderedSet[bool] type
 
-func NewBoolOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSet[bool], error) {
+func NewBoolOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[bool], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func NewBoolOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSe
 	return &OrderedSet[bool]{Proxy: *proxy, limit: limit, typed: new(bool)}, nil
 }
 
-func NewBoolOrderedSetWithDefault(key string, limit int64, defaultMembers []bool, opts ...ProxyOption) (s *OrderedSet[bool], err error) {
+func NewBoolOrderedSetWithDefault(key string, limit uint64, defaultMembers []bool, opts ...ProxyOption) (s *OrderedSet[bool], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func NewBoolOrderedSetWithDefault(key string, limit int64, defaultMembers []bool
 
 // OrderedSet[int] type
 
-func NewIntegerOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSet[int], error) {
+func NewIntegerOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[int], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func NewIntegerOrderedSet(key string, limit int64, opts ...ProxyOption) (*Ordere
 	return &OrderedSet[int]{Proxy: *proxy, limit: limit, typed: new(int)}, nil
 }
 
-func NewIntegerOrderedSetWithDefault(key string, limit int64, defaultMembers []int, opts ...ProxyOption) (s *OrderedSet[int], err error) {
+func NewIntegerOrderedSetWithDefault(key string, limit uint64, defaultMembers []int, opts ...ProxyOption) (s *OrderedSet[int], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func NewIntegerOrderedSetWithDefault(key string, limit int64, defaultMembers []i
 
 // OrderedSet[string] type
 
-func NewStringOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSet[string], error) {
+func NewStringOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[string], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func NewStringOrderedSet(key string, limit int64, opts ...ProxyOption) (*Ordered
 	return &OrderedSet[string]{Proxy: *proxy, limit: limit, typed: new(string)}, nil
 }
 
-func NewStringOrderedSetWithDefault(key string, limit int64, defaultMembers []string, opts ...ProxyOption) (s *OrderedSet[string], err error) {
+func NewStringOrderedSetWithDefault(key string, limit uint64, defaultMembers []string, opts ...ProxyOption) (s *OrderedSet[string], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func NewStringOrderedSetWithDefault(key string, limit int64, defaultMembers []st
 
 // OrderedSet[time.Time]
 
-func NewTimeOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSet[time.Time], error) {
+func NewTimeOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[time.Time], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func NewTimeOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSe
 	return &OrderedSet[time.Time]{Proxy: *proxy, limit: limit, typed: new(time.Time)}, nil
 }
 
-func NewTimeOrderedSetWithDefault(key string, limit int64, defaultMembers []time.Time, opts ...ProxyOption) (s *OrderedSet[time.Time], err error) {
+func NewTimeOrderedSetWithDefault(key string, limit uint64, defaultMembers []time.Time, opts ...ProxyOption) (s *OrderedSet[time.Time], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func NewTimeOrderedSetWithDefault(key string, limit int64, defaultMembers []time
 
 // OrderedSet[kredisJSON] type
 
-func NewJSONOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSet[kredisJSON], error) {
+func NewJSONOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[kredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func NewJSONOrderedSet(key string, limit int64, opts ...ProxyOption) (*OrderedSe
 	return &OrderedSet[kredisJSON]{Proxy: *proxy, limit: limit, typed: new(kredisJSON)}, nil
 }
 
-func NewJSONOrderedSetWithDefault(key string, limit int64, defaultMembers []kredisJSON, opts ...ProxyOption) (s *OrderedSet[kredisJSON], err error) {
+func NewJSONOrderedSetWithDefault(key string, limit uint64, defaultMembers []kredisJSON, opts ...ProxyOption) (s *OrderedSet[kredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
@@ -185,7 +185,7 @@ func (s *OrderedSet[T]) Append(members ...T) (added int64, removed int64, err er
 	pipe := s.client.TxPipeline()
 	add := pipe.ZAdd(s.ctx, s.key, newIter(members).valuesWithScoring(s, false)...)
 	if s.limit > 0 {
-		rem := pipe.ZRemRangeByRank(s.ctx, s.key, 0, -(s.limit + 1))
+		rem := pipe.ZRemRangeByRank(s.ctx, s.key, 0, -int64(s.limit+1))
 		pipe.Exec(s.ctx)
 		removed = rem.Val()
 	} else {
@@ -204,7 +204,7 @@ func (s *OrderedSet[T]) Prepend(members ...T) (added int64, removed int64, err e
 	pipe := s.client.TxPipeline()
 	add := pipe.ZAdd(s.ctx, s.key, newIter(members).valuesWithScoring(s, true)...)
 	if s.limit > 0 {
-		rem := pipe.ZRemRangeByRank(s.ctx, s.key, s.limit, -1)
+		rem := pipe.ZRemRangeByRank(s.ctx, s.key, int64(s.limit), -1)
 		pipe.Exec(s.ctx)
 		removed = rem.Val()
 	} else {
@@ -264,3 +264,7 @@ func (s *OrderedSet[T]) baseScore() float64 {
 // TODO
 //func (s OrderedSet[T]) Rank(member T) int64 {
 //}
+
+func (s *OrderedSet[T]) SetLimit(limit uint64) {
+	s.limit = limit
+}

@@ -164,7 +164,7 @@ func NewJSONListWithDefault(key string, defaultElements []kredisJSON, opts ...Pr
 
 // NOTE we're using Do() for the "LRANGE" command instead of LRange() as to
 // seemingly avoid an []string allocation from StringSliceCmd#Result()
-func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int, err error) {
+func (l *List[T]) Elements(elements []T, opts ...RangeOption) (total int64, err error) {
 	rangeOptions := RangeOptions{0}
 	for _, opt := range opts {
 		opt(&rangeOptions)

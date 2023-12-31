@@ -215,7 +215,7 @@ func (s *Set[T]) Clear() (err error) {
 	return
 }
 
-func (s *Set[T]) Sample(members []T) (total int, err error) {
+func (s *Set[T]) Sample(members []T) (total int64, err error) {
 	if len(members) == 0 {
 		return
 	}

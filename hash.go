@@ -68,7 +68,6 @@ func (h Hash[T]) Delete(fields ...string) (int64, error) {
 	return h.client.HDel(h.ctx, h.key, fields...).Result()
 }
 
-// TODO
 func (h *Hash[T]) ValuesAt(fields ...string) (values []T, err error) {
 	slice, err := h.client.HMGet(h.ctx, h.key, fields...).Result()
 	if err != nil {

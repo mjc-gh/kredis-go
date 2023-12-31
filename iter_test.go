@@ -13,7 +13,7 @@ func TestIterValues(t *testing.T) {
 		*NewKredisJSON(`{"a":"b"}`),
 	})
 
-	assert.Len(t, i.unique(), 2)
+	assert.Len(t, i.values(), 3)
 }
 
 func TestIterUnique(t *testing.T) {

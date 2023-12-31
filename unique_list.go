@@ -8,7 +8,7 @@ import (
 
 type UniqueList[T KredisTyped] struct {
 	Proxy
-	limit int64
+	limit uint64
 }
 
 // TODO finish generic Default factories
@@ -16,7 +16,7 @@ type UniqueList[T KredisTyped] struct {
 
 // UniqueList[bool] type
 
-func NewBoolUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueList[bool], error) {
+func NewBoolUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[bool], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
@@ -26,7 +26,7 @@ func NewBoolUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueLis
 	return &UniqueList[bool]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewBoolUniqueListWithDefault(key string, limit int64, defaultElements []bool, opts ...ProxyOption) (l *UniqueList[bool], err error) {
+func NewBoolUniqueListWithDefault(key string, limit uint64, defaultElements []bool, opts ...ProxyOption) (l *UniqueList[bool], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -46,7 +46,7 @@ func NewBoolUniqueListWithDefault(key string, limit int64, defaultElements []boo
 
 // UniqueList[int] type
 
-func NewIntegerUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueList[int], error) {
+func NewIntegerUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[int], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
@@ -56,7 +56,7 @@ func NewIntegerUniqueList(key string, limit int64, opts ...ProxyOption) (*Unique
 	return &UniqueList[int]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewIntegerUniqueListWithDefault(key string, limit int64, defaultElements []int, opts ...ProxyOption) (l *UniqueList[int], err error) {
+func NewIntegerUniqueListWithDefault(key string, limit uint64, defaultElements []int, opts ...ProxyOption) (l *UniqueList[int], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -76,7 +76,7 @@ func NewIntegerUniqueListWithDefault(key string, limit int64, defaultElements []
 
 // UniqueList[string] type
 
-func NewStringUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueList[string], error) {
+func NewStringUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[string], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
@@ -86,7 +86,7 @@ func NewStringUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueL
 	return &UniqueList[string]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewStringUniqueListWithDefault(key string, limit int64, defaultElements []string, opts ...ProxyOption) (l *UniqueList[string], err error) {
+func NewStringUniqueListWithDefault(key string, limit uint64, defaultElements []string, opts ...ProxyOption) (l *UniqueList[string], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -106,7 +106,7 @@ func NewStringUniqueListWithDefault(key string, limit int64, defaultElements []s
 
 // UniqueList[time] type
 
-func NewTimeUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueList[time.Time], error) {
+func NewTimeUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[time.Time], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
@@ -116,7 +116,7 @@ func NewTimeUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueLis
 	return &UniqueList[time.Time]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewTimeUniqueListWithDefault(key string, limit int64, defaultElements []time.Time, opts ...ProxyOption) (l *UniqueList[time.Time], err error) {
+func NewTimeUniqueListWithDefault(key string, limit uint64, defaultElements []time.Time, opts ...ProxyOption) (l *UniqueList[time.Time], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -136,7 +136,7 @@ func NewTimeUniqueListWithDefault(key string, limit int64, defaultElements []tim
 
 // UniqueList[kredisJSON] type
 
-func NewJSONUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueList[kredisJSON], error) {
+func NewJSONUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[kredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
@@ -146,7 +146,7 @@ func NewJSONUniqueList(key string, limit int64, opts ...ProxyOption) (*UniqueLis
 	return &UniqueList[kredisJSON]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewJSONUniqueListWithDefault(key string, limit int64, defaultElements []kredisJSON, opts ...ProxyOption) (l *UniqueList[kredisJSON], err error) {
+func NewJSONUniqueListWithDefault(key string, limit uint64, defaultElements []kredisJSON, opts ...ProxyOption) (l *UniqueList[kredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -244,7 +244,7 @@ func (l *UniqueList[T]) update(elements []T, updateFn func(redis.Pipeliner, []in
 
 	llen := updateFn(pipe, uniq)
 	if l.limit > 0 {
-		pipe.LTrim(l.ctx, l.key, -l.limit, -1)
+		pipe.LTrim(l.ctx, l.key, -int64(l.limit), -1)
 	}
 
 	_, err := pipe.Exec(l.ctx)
@@ -253,6 +253,10 @@ func (l *UniqueList[T]) update(elements []T, updateFn func(redis.Pipeliner, []in
 	}
 
 	return llen.Val(), nil
+}
+
+func (l *UniqueList[T]) SetLimit(limit uint64) {
+	l.limit = limit
 }
 
 // TODO add function last(n = 1) ??

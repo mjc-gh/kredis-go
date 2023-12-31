@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -20,9 +18,13 @@ var configs map[string]*config = map[string]*config{}
 var connections map[string]*redis.Client = map[string]*redis.Client{}
 var connectionLogging bool
 
-func SetConnectionLogging(v bool) {
+func SetCommandLogging(v bool) {
 	connectionLogging = v
 }
+
+// TODO add a way to configure a user provided value that implements the
+// cmdLogging interface
+// func SetCommandLogger(userLogger cmdLogging)
 
 func SetConfiguration(name, namespace, url string) error {
 	opt, err := redis.ParseURL(url)
@@ -41,37 +43,33 @@ func SetConfiguration(name, namespace, url string) error {
 	return nil
 }
 
-//func LoadConfigurations(filepath string) {}
-
 func getConnection(name string) (*redis.Client, *string, error) {
 	config, configured := configs[name]
-
 	if !configured {
 		return nil, nil, fmt.Errorf("%s is not a configured configuration", name)
 	}
 
 	conn, ok := connections[name]
-
 	if ok {
 		return conn, &config.namespace, nil
 	}
 
 	conn = redis.NewClient(config.options)
-
-	if connectionLogging {
-		conn.AddHook(newCmdLoggingHook())
-	}
-
 	connections[name] = conn
 
-	//return conn
+	if connectionLogging {
+		conn.AddHook(newCmdLoggingHook(NewStdoutLogger()))
+	}
+
 	return conn, &config.namespace, nil
 }
 
-type cmdLoggingHook struct{}
+type cmdLoggingHook struct {
+	cmdLogger cmdLogging
+}
 
-func newCmdLoggingHook() *cmdLoggingHook {
-	return &cmdLoggingHook{}
+func newCmdLoggingHook(clog cmdLogging) *cmdLoggingHook {
+	return &cmdLoggingHook{clog}
 }
 
 func (c *cmdLoggingHook) DialHook(hook redis.DialHook) redis.DialHook {
@@ -80,19 +78,12 @@ func (c *cmdLoggingHook) DialHook(hook redis.DialHook) redis.DialHook {
 	}
 }
 
-var cmdColor = color.New(color.FgYellow).SprintFunc()
-var keyColor = color.New(color.FgCyan).SprintFunc()
-var argsColor = color.New(color.FgGreen).SprintFunc()
-
 func (c *cmdLoggingHook) ProcessHook(hook redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
-		name, key, args := cmdLogParts(cmd)
-
 		start := time.Now()
 		err := hook(ctx, cmd)
-		dur := float64(time.Since(start).Microseconds()) / 1000.0
 
-		fmt.Printf("Kredis (%.1fms) %s %s %s\n", dur, name, key, args)
+		c.cmdLogger.Info(cmd, time.Since(start))
 
 		return err
 	}
@@ -100,46 +91,17 @@ func (c *cmdLoggingHook) ProcessHook(hook redis.ProcessHook) redis.ProcessHook {
 
 func (c *cmdLoggingHook) ProcessPipelineHook(hook redis.ProcessPipelineHook) redis.ProcessPipelineHook {
 	return func(ctx context.Context, cmds []redis.Cmder) error {
-
 		start := time.Now()
 		err := hook(ctx, cmds)
-		dur := float64(time.Since(start).Microseconds()) / 1000.0
 
 		for idx, cmd := range cmds {
-			name, key, args := cmdLogParts(cmd)
-
 			if idx == len(cmds)-1 {
-				fmt.Printf("Kredis (%.1fms) %s %s %s\n", dur, name, key, args)
+				c.cmdLogger.Info(cmd, time.Since(start))
 			} else {
-				fmt.Printf("Kredis (tx)    %s %s %s\n", name, key, args)
+				c.cmdLogger.Info(cmd, time.Duration(0))
 			}
 		}
 
 		return err
 	}
-}
-
-func cmdLogParts(cmd redis.Cmder) (string, string, string) {
-	var key string
-	var args []string
-
-	cmdArgs := cmd.Args()
-	name := cmdColor(strings.ToUpper(cmd.Name()))
-
-	if len(cmdArgs) > 1 {
-		switch cmdArgs[1].(type) {
-		case int64:
-			key = keyColor(cmdArgs[1].(int64))
-		default:
-			key = keyColor(cmdArgs[1].(string))
-		}
-	}
-
-	if len(cmdArgs) > 2 {
-		for _, cmdArg := range cmdArgs[2:] {
-			args = append(args, argsColor(fmt.Sprintf("%v", cmdArg)))
-		}
-	}
-
-	return name, key, strings.Join(args, " ")
 }
