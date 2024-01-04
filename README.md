@@ -6,7 +6,21 @@ A port of [Rails' Kredis](https://github.com/rails/kredis) for Go.
 structures around a single key, so you can interact with them as
 coherent objects rather than isolated procedural commands.
 
-## Lists
+### Motivation
+
+I wrote a Go version of Kredis to help me learn Go and the Redis
+client package. This exercise also helped me explore generics in detail.
+
+In theory, there should be full interoperability between this Go package
+and the Ruby version, thus enabling services either language to work
+together over Redis.
+
+## Types
+
+- [Lists](#lists)
+- [Slots](#slots)
+
+### Lists
 
 ```go
 l := NewIntegerList("users")
@@ -43,7 +57,7 @@ n := strs.Length()          // LLEN lines
 // 2
 ```
 
-## Slots
+### Slots
 
 ```go
 slot := NewSlot("slot", 3)
@@ -75,7 +89,7 @@ slot.Reserve(func () { fmt.Println("called") })
 // true
 ```
 
-## Scalar types
+### Scalar types
 
 - `NewBool` and `NewBoolWithDefault`
 - `NewInteger` and `NewIntegerWithDefault`
@@ -95,14 +109,13 @@ k.Value()               // GET myint
 
 Implement additional Kredis data structures
 
-- new `Limiter` counter-based type
 - other scalar types
     - float type
         - on lists and other collections
     - some sort of map type (serialized as json) ??
+- document all types in README
 - make API more succinct
     - always use `expiresIn` when possible (lists, sets, and other collections). or refactor `ProxyOption` to not allow it for certain collection types?
-- document all types in README
 - github test matrix with multiple versions of Go and Redis
 - test commands with some sort of test env `ProcessHook` for redis
     clients

@@ -40,3 +40,21 @@ func (s *KredisTestSuite) TestCounterWithExpiry() {
 
 	s.Empty(c.Value())
 }
+
+func (s *KredisTestSuite) TestCounterWithDefault() {
+	c, _ := NewCounterWithDefault("counter", 23)
+
+	s.Equal(int64(23), c.Value())
+}
+
+func (s *KredisTestSuite) TestCounterWithDefaultAndExpiry() {
+	c, _ := NewCounterWithDefault("counter", 23, WithExpiry("1ms"))
+
+	c.Increment(1)
+	c.Increment(2)
+	c.Increment(3)
+
+	time.Sleep(5 * time.Millisecond)
+
+	s.Empty(c.Value())
+}

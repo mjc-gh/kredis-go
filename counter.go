@@ -6,8 +6,6 @@ type Counter struct {
 	Proxy
 }
 
-// TODO add default value factory
-
 func NewCounter(key string, opts ...ProxyOption) (*Counter, error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
@@ -15,6 +13,21 @@ func NewCounter(key string, opts ...ProxyOption) (*Counter, error) {
 	}
 
 	return &Counter{Proxy: *proxy}, nil
+}
+
+func NewCounterWithDefault(key string, defaultValue int64, opts ...ProxyOption) (c *Counter, err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	c = &Counter{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := c.Increment(defaultValue)
+		return err
+	})
+
+	return
 }
 
 func (c *Counter) Increment(by int64) (int64, error) {
