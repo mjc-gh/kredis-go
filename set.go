@@ -65,6 +65,35 @@ func NewIntegerSetWithDefault(key string, defaultMembers []int, opts ...ProxyOpt
 	return
 }
 
+// Set[float64] type
+
+func NewFloatSet(key string, opts ...ProxyOption) (*Set[float64], error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Set[float64]{Proxy: *proxy, typed: new(float64)}, nil
+}
+
+func NewFloatSetWithDefault(key string, defaultMembers []float64, opts ...ProxyOption) (s *Set[float64], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	s = &Set[float64]{Proxy: *proxy, typed: new(float64)}
+	err = proxy.watch(func() error {
+		_, err := s.Add(defaultMembers...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 // Set[string] type
 
 func NewStringSet(key string, opts ...ProxyOption) (*Set[string], error) {

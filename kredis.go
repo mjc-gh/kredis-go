@@ -16,7 +16,7 @@ type kredisJSON struct {
 
 type KredisTyped interface {
 	comparable
-	~bool | ~int | ~string | kredisJSON | time.Time
+	~bool | ~int | ~float64 | ~string | kredisJSON | time.Time
 }
 
 // kredisJSON is a small struct wrapper for dealing with JSON strings
@@ -107,6 +107,13 @@ func stringCmdToTyped[T KredisTyped](cmd *redis.StringCmd, typed *T) (T, bool) {
 		}
 		return any(n).(T), true
 
+	case float64:
+		f, err := cmd.Float64()
+		if err != nil {
+			return any(0.0).(T), false
+		}
+		return any(f).(T), true
+
 	case time.Time:
 		t, err := cmd.Time()
 		if err != nil {
@@ -142,6 +149,10 @@ func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) (total int64) {
 			n, _ := strconv.Atoi(e.(string))
 
 			dst[i] = any(n).(T)
+		case float64:
+			f, _ := strconv.ParseFloat(e.(string), 64)
+
+			dst[i] = any(f).(T)
 		case kredisJSON:
 			j := NewKredisJSON(e.(string))
 

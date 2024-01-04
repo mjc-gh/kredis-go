@@ -31,6 +31,37 @@ func (s *KredisTestSuite) TestIntegerUniqueList() {
 	s.Equal([]int{4}, elements)
 }
 
+func (s *KredisTestSuite) TestFloatUniqueList() {
+	l, e := NewFloatUniqueList("uniq_float64s", 3)
+	s.NoError(e)
+
+	n, e := l.Append(1.2, 2.3)
+	s.NoError(e)
+	s.Equal(int64(2), n)
+
+	n, e = l.Prepend(2.3, 4.5, 6.7)
+	s.NoError(e)
+	s.Equal(int64(4), n)
+
+	n, e = l.Length()
+	s.NoError(e)
+	s.Equal(int64(3), n)
+
+	elements := make([]float64, 3)
+	n, e = l.Elements(elements)
+	s.NoError(e)
+	s.Equal(int64(3), n)
+	s.Equal([]float64{4.5, 2.3, 1.2}, elements)
+
+	s.NoError(l.Remove(2, 1))
+
+	elements = make([]float64, 1)
+	n, e = l.Elements(elements)
+	s.NoError(e)
+	s.Equal(int64(1), n)
+	s.Equal([]float64{4.5}, elements)
+}
+
 func (s *KredisTestSuite) TestStringUniqueList() {
 	l, e := NewStringUniqueList("uniq_strs", 5)
 	s.NoError(e)

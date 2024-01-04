@@ -97,6 +97,38 @@ func (s *KredisTestSuite) TestIntegerListWithDefault() {
 	s.Equal([]int{5, 7, 9}, elems)
 }
 
+func (s *KredisTestSuite) TestFloatList() {
+	elems := make([]float64, 5)
+
+	l, e := NewFloatList("list")
+	s.NoError(e)
+
+	n, err := l.Elements(elems)
+	s.NoError(err)
+	s.Zero(n)
+
+	llen, err := l.Append(1.1, 2.4, 3.17)
+	s.NoError(err)
+	s.Equal(int64(3), llen)
+
+	llen, err = l.Prepend(8.001, 9.000001)
+	s.NoError(err)
+	s.Equal(int64(5), llen)
+
+	n, err = l.Elements(elems)
+	s.NoError(err)
+	s.Equal(int64(5), n)
+	s.Equal([]float64{9.000001, 8.001, 1.1, 2.4, 3.17}, elems)
+
+	elems = make([]float64, 3)
+	n, err = l.Elements(elems)
+	s.NoError(err)
+	s.Equal(int64(3), n)
+	s.Equal([]float64{9.000001, 8.001, 1.1}, elems)
+
+	s.NoError(l.Clear())
+}
+
 func (s *KredisTestSuite) TestBoolList() {
 	elems := make([]bool, 5)
 

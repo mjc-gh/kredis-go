@@ -18,7 +18,6 @@ type UniqueList[T KredisTyped] struct {
 
 func NewBoolUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[bool], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +47,6 @@ func NewBoolUniqueListWithDefault(key string, limit uint64, defaultElements []bo
 
 func NewIntegerUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[int], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +61,36 @@ func NewIntegerUniqueListWithDefault(key string, limit uint64, defaultElements [
 	}
 
 	l = &UniqueList[int]{Proxy: *proxy, limit: limit}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// UniqueList[int] type
+
+func NewFloatUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[float64], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &UniqueList[float64]{Proxy: *proxy, limit: limit}, nil
+}
+
+func NewFloatUniqueListWithDefault(key string, limit uint64, defaultElements []float64, opts ...ProxyOption) (l *UniqueList[float64], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	l = &UniqueList[float64]{Proxy: *proxy, limit: limit}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err

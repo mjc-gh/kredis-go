@@ -76,6 +76,35 @@ func NewIntegerOrderedSetWithDefault(key string, limit uint64, defaultMembers []
 	return
 }
 
+// OrderedSet[int] type
+
+func NewFloatOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[float64], error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &OrderedSet[float64]{Proxy: *proxy, limit: limit, typed: new(float64)}, nil
+}
+
+func NewFloatOrderedSetWithDefault(key string, limit uint64, defaultMembers []float64, opts ...ProxyOption) (s *OrderedSet[float64], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	s = &OrderedSet[float64]{Proxy: *proxy, limit: limit, typed: new(float64)}
+	err = proxy.watch(func() error {
+		_, _, err := s.Append(defaultMembers...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 // OrderedSet[string] type
 
 func NewStringOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[string], error) {

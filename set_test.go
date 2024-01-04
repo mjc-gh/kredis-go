@@ -70,6 +70,35 @@ func (s *KredisTestSuite) TestIntegerSet() {
 	s.False(ok)
 }
 
+func (s *KredisTestSuite) TestFloatSet() {
+	set, e := NewFloatSet("floats")
+	s.NoError(e)
+
+	n, e := set.Add(1.1, 5.2, 2.5)
+	s.NoError(e)
+	s.Equal(int64(3), n)
+
+	n, e = set.Replace(4.4, 3.7)
+	s.NoError(e)
+	s.Equal(int64(2), n)
+
+	s.True(set.Includes(4.4))
+	s.False(set.Includes(5.2))
+	s.Equal(int64(2), set.Size())
+
+	s.NoError(set.Clear())
+	s.False(set.Includes(4))
+	s.Equal(int64(0), set.Size())
+
+	set.Add(1.1)
+	t, ok := set.Take()
+	s.True(ok)
+	s.Equal(1.1, t)
+
+	t, ok = set.Take()
+	s.False(ok)
+}
+
 func (s *KredisTestSuite) TestStringSet() {
 	set, e := NewStringSet("strings")
 	s.NoError(e)

@@ -70,6 +70,36 @@ func NewIntegerListWithDefault(key string, defaultElements []int, opts ...ProxyO
 	return
 }
 
+// List[float64] type
+
+func NewFloatList(key string, opts ...ProxyOption) (*List[float64], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &List[float64]{Proxy: *proxy}, nil
+}
+
+func NewFloatListWithDefault(key string, defaultElements []float64, opts ...ProxyOption) (l *List[float64], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	l = &List[float64]{Proxy: *proxy}
+	err = proxy.watch(func() error {
+		_, err := l.Append(defaultElements...)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 // List[string] type
 
 func NewStringList(key string, opts ...ProxyOption) (*List[string], error) {
