@@ -279,6 +279,7 @@ func (l *UniqueList[T]) update(elements []T, updateFn func(redis.Pipeliner, []in
 		return 0, err
 	}
 
+	l.RefreshTTL()
 	return llen.Val(), nil
 }
 

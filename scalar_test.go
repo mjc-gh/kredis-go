@@ -1,6 +1,8 @@
 package kredis
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -29,6 +31,10 @@ func (s *KredisTestSuite) TestScalarBool() {
 
 	s.NoError(e)
 	s.True(k.Value())
+
+	ttl, e := k.TTL()
+	s.NoError(e)
+	s.Equal(time.Duration(0), ttl)
 }
 
 func (s *KredisTestSuite) TestScalarBoolWithDefaultValue() {
@@ -69,6 +75,19 @@ func (s *KredisTestSuite) TestScalarBoolExpiresIn() {
 	v, e := k.ValueResult()
 	s.Equal(redis.Nil, e)
 	s.Nil(v)
+
+	k, _ = NewBool("foo", WithExpiry("1s"))
+	k.SetValue(true)
+	ttl, _ := k.TTL()
+	s.Greater(ttl, time.Duration(0))
+}
+
+func (s *KredisTestSuite) TestScalarBoolWithContext() {
+	k, e := NewBool("b", WithContext(context.TODO()))
+	s.NoError(e)
+
+	s.Empty(k.Value())
+	s.Equal("context.TODO", fmt.Sprintf("%v", k.ctx))
 }
 
 func (s *KredisTestSuite) TestNewString() {

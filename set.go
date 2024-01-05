@@ -200,16 +200,24 @@ func (s *Set[T]) Members() ([]T, error) {
 // TODO return a map? will not work with bool...
 //func (s *Set[T]) MembersMap ??
 
-func (s *Set[T]) Add(members ...T) (int64, error) {
+func (s *Set[T]) Add(members ...T) (added int64, err error) {
 	if len(members) < 1 {
 		return 0, nil
 	}
 
-	return s.client.SAdd(s.ctx, s.key, newIter(members).values()...).Result()
+	added, err = s.client.SAdd(s.ctx, s.key, newIter(members).values()...).Result()
+	s.RefreshTTL()
+	return
 }
 
-func (s *Set[T]) Remove(members ...T) (int64, error) {
-	return s.client.SRem(s.ctx, s.key, newIter(members).values()...).Result()
+func (s *Set[T]) Remove(members ...T) (removed int64, err error) {
+	if len(members) < 1 {
+		return 0, nil
+	}
+
+	removed, err = s.client.SRem(s.ctx, s.key, newIter(members).values()...).Result()
+	s.RefreshTTL()
+	return
 }
 
 func (s *Set[T]) Replace(members ...T) (int64, error) {
@@ -222,6 +230,7 @@ func (s *Set[T]) Replace(members ...T) (int64, error) {
 		return 0, err
 	}
 
+	s.RefreshTTL()
 	return add.Val(), nil
 }
 
@@ -234,7 +243,9 @@ func (s *Set[T]) Size() int64 {
 }
 
 func (s *Set[T]) Take() (T, bool) {
-	return stringCmdToTyped[T](s.client.SPop(s.ctx, s.key), s.typed)
+	cmd := s.client.SPop(s.ctx, s.key)
+	s.RefreshTTL()
+	return stringCmdToTyped[T](cmd, s.typed)
 }
 
 // TODO func (s *Set[T]) TakeN(memebers []T) (error)
@@ -253,6 +264,7 @@ func (s *Set[T]) Sample(members []T) (total int64, err error) {
 		return
 	}
 
+	s.RefreshTTL()
 	total = copyCmdSliceTo(slice, members)
 	return
 }

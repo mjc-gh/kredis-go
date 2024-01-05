@@ -1,12 +1,16 @@
 package kredis
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // variadic configuration functions and structs
 
 // general proxy options (all factories)
 
 type ProxyOptions struct {
+	context   context.Context
 	config    *string
 	expiresIn *time.Duration
 }
@@ -46,13 +50,11 @@ func WithExpiry(expires string) ProxyOption {
 	}
 }
 
-// TODO WithContext ProxyOption for providing a user-defined context.Context for the Proxy
-// struct and thus the redis client commands
-
-// func WithContext(ctx context.Context) ProxyOption {
-//   return func(o *ProxyOptions) {
-//   }
-// }
+func WithContext(ctx context.Context) ProxyOption {
+	return func(o *ProxyOptions) {
+		o.context = ctx
+	}
+}
 
 // For range options (list, unique lists)
 

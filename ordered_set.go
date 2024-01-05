@@ -222,6 +222,7 @@ func (s *OrderedSet[T]) Append(members ...T) (added int64, removed int64, err er
 	}
 
 	added = add.Val()
+	s.RefreshTTL()
 	return
 }
 
@@ -241,11 +242,15 @@ func (s *OrderedSet[T]) Prepend(members ...T) (added int64, removed int64, err e
 	}
 
 	added = add.Val()
+	s.RefreshTTL()
 	return
 }
 
-func (s *OrderedSet[T]) Remove(members ...T) (int64, error) {
-	return s.client.ZRem(s.ctx, s.key, newIter(members).values()...).Result()
+func (s *OrderedSet[T]) Remove(members ...T) (removed int64, err error) {
+	removed, err = s.client.ZRem(s.ctx, s.key, newIter(members).values()...).Result()
+	s.RefreshTTL()
+
+	return
 }
 
 func (s *OrderedSet[T]) Includes(member T) bool {
@@ -264,6 +269,14 @@ func (s *OrderedSet[T]) Clear() error {
 func (s *OrderedSet[T]) Size() int64 {
 	return s.client.ZCard(s.ctx, s.key).Val()
 }
+
+func (s *OrderedSet[T]) SetLimit(limit uint64) {
+	s.limit = limit
+}
+
+// TODO
+//func (s OrderedSet[T]) Rank(member T) int64 {
+//}
 
 func (s *OrderedSet[T]) appendScore(index int) float64 {
 	baseScore := s.baseScore()
@@ -287,12 +300,4 @@ func (s *OrderedSet[T]) baseScore() float64 {
 	ts := s.base.Add(time.Since(s.base)).UnixNano()
 
 	return float64(ts) / float64(1e9)
-}
-
-// TODO
-//func (s OrderedSet[T]) Rank(member T) int64 {
-//}
-
-func (s *OrderedSet[T]) SetLimit(limit uint64) {
-	s.limit = limit
 }

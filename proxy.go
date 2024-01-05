@@ -8,9 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// TODO Add Pipelining support
-// https://redis.uptrace.dev/guide/go-redis-pipelines.html#pipelines
-
 type Proxy struct {
 	ctx       context.Context
 	client    *redis.Client
@@ -19,7 +16,7 @@ type Proxy struct {
 }
 
 func NewProxy(key string, opts ...ProxyOption) (*Proxy, error) {
-	options := ProxyOptions{}
+	options := ProxyOptions{context: context.Background()}
 	for _, opt := range opts {
 		opt(&options)
 	}
@@ -34,14 +31,14 @@ func NewProxy(key string, opts ...ProxyOption) (*Proxy, error) {
 	}
 
 	return &Proxy{
-		// TODO figure out the best way to handle context
-		ctx:       context.TODO(),
+		ctx:       options.context,
 		client:    client,
 		key:       key,
 		expiresIn: options.ExpiresIn(),
 	}, nil
 }
 
+// Used when setting defaults
 func (p *Proxy) watch(setter func() error) error {
 	err := p.client.Watch(p.ctx, func(tx *redis.Tx) error {
 		n, err := tx.Exists(p.ctx, p.key).Result()
@@ -58,4 +55,24 @@ func (p *Proxy) watch(setter func() error) error {
 	}
 
 	return nil
+}
+
+// Get the key's current TTL. Redis is only called if the type was configured
+// WithExpiry(). If no expiry is configured, a zero value Duration is returned
+func (p *Proxy) TTL() (time.Duration, error) {
+	if p.expiresIn == 0 {
+		return time.Duration(0), nil
+	}
+
+	return p.client.TTL(p.ctx, p.key).Result()
+}
+
+// Set the key's EXPIRE using the configured expiresIn. If there is no
+// value configured, nothing happens.
+func (p *Proxy) RefreshTTL() (bool, error) {
+	if p.expiresIn == 0 {
+		return false, nil
+	}
+
+	return p.client.Expire(p.ctx, p.key, p.expiresIn).Result()
 }

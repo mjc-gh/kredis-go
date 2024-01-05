@@ -221,9 +221,6 @@ func (l *List[T]) Remove(elements ...T) (err error) {
 	return
 }
 
-// TODO should Prepend and Append return an int not an int64 for greater ease
-// of use??
-
 func (l List[T]) Prepend(elements ...T) (int64, error) {
 	if len(elements) < 1 {
 		return 0, nil
@@ -234,6 +231,7 @@ func (l List[T]) Prepend(elements ...T) (int64, error) {
 		return 0, err
 	}
 
+	l.RefreshTTL()
 	return llen, nil
 }
 
@@ -247,6 +245,7 @@ func (l *List[T]) Append(elements ...T) (int64, error) {
 		return 0, err
 	}
 
+	l.RefreshTTL()
 	return llen, nil
 }
 
