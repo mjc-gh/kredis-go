@@ -7,7 +7,7 @@ import (
 )
 
 func TestIterValues(t *testing.T) {
-	i := newIter([]kredisJSON{
+	i := newIter([]KredisJSON{
 		*NewKredisJSON(`{"a":"b"}`),
 		*NewKredisJSON(`{"c":"d"}`),
 		*NewKredisJSON(`{"a":"b"}`),
@@ -17,7 +17,7 @@ func TestIterValues(t *testing.T) {
 }
 
 func TestIterUnique(t *testing.T) {
-	i := newIter([]kredisJSON{
+	i := newIter([]KredisJSON{
 		*NewKredisJSON(`{"a":"b"}`),
 		*NewKredisJSON(`{"c":"d"}`),
 		*NewKredisJSON(`{"a":"b"}`),

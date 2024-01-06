@@ -28,6 +28,9 @@ func NewFlag(key string, opts ...ProxyOption) (*Flag, error) {
 	return &Flag{Proxy: *proxy}, nil
 }
 
+// TODO this should return true/false if flag was set or not
+// true == flag.mark(expires_in: 1.second, force: false)    #=> SET myflag 1 EX 1 NX
+// false == flag.mark(expires_in: 10.seconds, force: false) #=> SET myflag 10 EX 1 NX
 func (f *Flag) Mark(opts ...FlagMarkOption) error {
 	options := FlagMarkOptions{force: false}
 	for _, opt := range opts {

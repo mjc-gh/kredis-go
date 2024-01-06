@@ -9,28 +9,28 @@ import (
 )
 
 // TODO does this need to be exported??
-// type kredisJSON []byte
-type kredisJSON struct {
+// type KredisJSON []byte
+type KredisJSON struct {
 	s string
 }
 
 type KredisTyped interface {
 	comparable
-	~bool | ~int | ~float64 | ~string | kredisJSON | time.Time
+	~bool | ~int | ~float64 | ~string | KredisJSON | time.Time
 }
 
-// kredisJSON is a small struct wrapper for dealing with JSON strings
-func NewKredisJSON(jsonStr string) *kredisJSON {
-	var kj kredisJSON = kredisJSON{jsonStr}
+// KredisJSON is a small struct wrapper for dealing with JSON strings
+func NewKredisJSON(jsonStr string) *KredisJSON {
+	var kj KredisJSON = KredisJSON{jsonStr}
 
 	return &kj
 }
 
-func (kj kredisJSON) String() string {
+func (kj KredisJSON) String() string {
 	return kj.s
 }
 
-func (kj *kredisJSON) Unmarshal(data *interface{}) error {
+func (kj *KredisJSON) Unmarshal(data *interface{}) error {
 	err := json.Unmarshal([]byte(kj.s), data)
 	if err != nil {
 		return err
@@ -44,8 +44,8 @@ func typeToInterface[T KredisTyped](t T) interface{} {
 	switch any(t).(type) {
 	case time.Time:
 		return any(t).(time.Time).Format(time.RFC3339Nano)
-	case kredisJSON:
-		return any(t).(kredisJSON).String()
+	case KredisJSON:
+		return any(t).(KredisJSON).String()
 	default:
 		return t
 	}
@@ -78,8 +78,8 @@ func stringToTyped[T KredisTyped](value string, typed *T) (T, bool) {
 	case string:
 		return any(value).(T), true
 
-	case kredisJSON:
-		return any(NewKredisJSON(value)).(T), true
+	case KredisJSON:
+		return any(*NewKredisJSON(value)).(T), true
 	}
 
 	return any(*typed).(T), false
@@ -124,8 +124,8 @@ func stringCmdToTyped[T KredisTyped](cmd *redis.StringCmd, typed *T) (T, bool) {
 	case string:
 		return any(cmd.Val()).(T), true
 
-	case kredisJSON:
-		return any(NewKredisJSON(cmd.Val())).(T), true
+	case KredisJSON:
+		return any(*NewKredisJSON(cmd.Val())).(T), true
 	}
 
 Empty:
@@ -153,7 +153,7 @@ func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) (total int64) {
 			f, _ := strconv.ParseFloat(e.(string), 64)
 
 			dst[i] = any(f).(T)
-		case kredisJSON:
+		case KredisJSON:
 			j := NewKredisJSON(e.(string))
 
 			dst[i] = any(*j).(T)

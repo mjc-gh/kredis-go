@@ -11,12 +11,12 @@ type Enum struct {
 	values       map[string]bool
 }
 
-var EmptyValues = errors.New("values cannot be empty")
-var InvalidValue = errors.New("invalid enum value")
+var EnumEmptyValues = errors.New("values cannot be empty")
+var EnumInvalidValue = errors.New("invalid enum value")
 
 func NewEnum(key string, defaultValue string, values []string, opts ...ProxyOption) (*Enum, error) {
 	if len(values) == 0 {
-		return nil, EmptyValues
+		return nil, EnumEmptyValues
 	}
 
 	proxy, err := NewProxy(key, opts...)
@@ -51,7 +51,7 @@ func (e *Enum) Value() string {
 
 func (e *Enum) SetValue(value string) error {
 	if _, ok := e.values[value]; !ok {
-		return InvalidValue
+		return EnumInvalidValue
 	}
 
 	_, err := e.client.Set(e.ctx, e.key, value, time.Duration(0)).Result()

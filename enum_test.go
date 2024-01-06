@@ -17,7 +17,7 @@ func (s *KredisTestSuite) TestEnum() {
 
 	err = enum.SetValue("badval")
 	s.Error(err)
-	s.Equal(InvalidValue, err)
+	s.Equal(EnumInvalidValue, err)
 
 	s.NoError(enum.Reset())
 	s.Equal("ready", enum.Value())
@@ -27,5 +27,5 @@ func (s *KredisTestSuite) TestEnum() {
 func (s *KredisTestSuite) TestEnumWithEmptyValues() {
 	_, err := NewEnum("key", "ready", []string{})
 	s.Error(err)
-	s.Equal(EmptyValues, err)
+	s.Equal(EnumEmptyValues, err)
 }

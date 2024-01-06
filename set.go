@@ -152,24 +152,24 @@ func NewTimeSetWithDefault(key string, defaultMembers []time.Time, opts ...Proxy
 	return
 }
 
-// Set[kredisJSON] type
+// Set[KredisJSON] type
 
-func NewJSONSet(key string, opts ...ProxyOption) (*Set[kredisJSON], error) {
+func NewJSONSet(key string, opts ...ProxyOption) (*Set[KredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Set[kredisJSON]{Proxy: *proxy, typed: new(kredisJSON)}, nil
+	return &Set[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}, nil
 }
 
-func NewJSONSetWithDefault(key string, defaultMembers []kredisJSON, opts ...ProxyOption) (s *Set[kredisJSON], err error) {
+func NewJSONSetWithDefault(key string, defaultMembers []KredisJSON, opts ...ProxyOption) (s *Set[KredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	s = &Set[kredisJSON]{Proxy: *proxy, typed: new(kredisJSON)}
+	s = &Set[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}
 	err = proxy.watch(func() error {
 		_, err := s.Add(defaultMembers...)
 		return err
@@ -183,8 +183,6 @@ func NewJSONSetWithDefault(key string, defaultMembers []kredisJSON, opts ...Prox
 
 // generic Set functions
 
-// TODO this will force an allocation onto the caller -- can this be avoided?
-// are there better Go idioms for read all set members?
 func (s *Set[T]) Members() ([]T, error) {
 	slice, err := s.client.Do(s.ctx, "smembers", s.key).Slice()
 	if err != nil {

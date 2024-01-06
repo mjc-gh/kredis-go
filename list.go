@@ -160,25 +160,25 @@ func NewTimeListWithDefault(key string, defaultElements []time.Time, opts ...Pro
 	return
 }
 
-// List[kredisJSON] type
+// List[KredisJSON] type
 
-func NewJSONList(key string, opts ...ProxyOption) (*List[kredisJSON], error) {
+func NewJSONList(key string, opts ...ProxyOption) (*List[KredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &List[kredisJSON]{Proxy: *proxy}, nil
+	return &List[KredisJSON]{Proxy: *proxy}, nil
 }
 
-func NewJSONListWithDefault(key string, defaultElements []kredisJSON, opts ...ProxyOption) (l *List[kredisJSON], err error) {
+func NewJSONListWithDefault(key string, defaultElements []KredisJSON, opts ...ProxyOption) (l *List[KredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}
 
-	l = &List[kredisJSON]{Proxy: *proxy}
+	l = &List[KredisJSON]{Proxy: *proxy}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err

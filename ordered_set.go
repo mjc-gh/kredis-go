@@ -163,24 +163,24 @@ func NewTimeOrderedSetWithDefault(key string, limit uint64, defaultMembers []tim
 	return
 }
 
-// OrderedSet[kredisJSON] type
+// OrderedSet[KredisJSON] type
 
-func NewJSONOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[kredisJSON], error) {
+func NewJSONOrderedSet(key string, limit uint64, opts ...ProxyOption) (*OrderedSet[KredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &OrderedSet[kredisJSON]{Proxy: *proxy, limit: limit, typed: new(kredisJSON)}, nil
+	return &OrderedSet[KredisJSON]{Proxy: *proxy, limit: limit, typed: new(KredisJSON)}, nil
 }
 
-func NewJSONOrderedSetWithDefault(key string, limit uint64, defaultMembers []kredisJSON, opts ...ProxyOption) (s *OrderedSet[kredisJSON], err error) {
+func NewJSONOrderedSetWithDefault(key string, limit uint64, defaultMembers []KredisJSON, opts ...ProxyOption) (s *OrderedSet[KredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	s = &OrderedSet[kredisJSON]{Proxy: *proxy, limit: limit, typed: new(kredisJSON)}
+	s = &OrderedSet[KredisJSON]{Proxy: *proxy, limit: limit, typed: new(KredisJSON)}
 	err = proxy.watch(func() error {
 		_, _, err := s.Append(defaultMembers...)
 		return err

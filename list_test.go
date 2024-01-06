@@ -229,7 +229,7 @@ func (s *KredisTestSuite) TestTimeListWithDefault() {
 }
 
 func (s *KredisTestSuite) TestJSONList() {
-	elems := make([]kredisJSON, 3)
+	elems := make([]KredisJSON, 3)
 
 	l, e := NewJSONList("json_list")
 	s.NoError(e)
@@ -255,7 +255,7 @@ func (s *KredisTestSuite) TestJSONList() {
 	s.NoError(err)
 	s.Equal(int64(3), n)
 
-	s.Equal([]kredisJSON{*kj_3, *kj_1, *kj_2}, elems)
+	s.Equal([]KredisJSON{*kj_3, *kj_1, *kj_2}, elems)
 
 	var data interface{}
 
@@ -269,15 +269,15 @@ func (s *KredisTestSuite) TestJSONListWithDefault() {
 	kj_1 := NewKredisJSON(`{"k1":"v1"}`)
 	kj_2 := NewKredisJSON(`{"k2":"v2"}`)
 
-	l, _ := NewJSONListWithDefault("list_default", []kredisJSON{*kj_1, *kj_2})
+	l, _ := NewJSONListWithDefault("list_default", []KredisJSON{*kj_1, *kj_2})
 
-	NewJSONListWithDefault("list_default", []kredisJSON{*NewKredisJSON(`{"abc":"xyz"}`)})
+	NewJSONListWithDefault("list_default", []KredisJSON{*NewKredisJSON(`{"abc":"xyz"}`)})
 
-	elems := make([]kredisJSON, 3)
+	elems := make([]KredisJSON, 3)
 	n, e := l.Elements(elems)
 	s.NoError(e)
 	s.Equal(int64(2), n)
-	s.Equal([]kredisJSON{*kj_1, *kj_2}, elems[0:2])
+	s.Equal([]KredisJSON{*kj_1, *kj_2}, elems[0:2])
 }
 
 func (s *KredisTestSuite) TestElementsWithRangeOptions() {

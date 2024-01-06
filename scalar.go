@@ -284,7 +284,7 @@ func NewJSON(key string, opts ...ProxyOption) (*ScalarJSON, error) {
 	return &ScalarJSON{Proxy: *proxy}, nil
 }
 
-func NewJSONWithDefault(key string, defaultValue *kredisJSON, opts ...ProxyOption) (s *ScalarJSON, err error) {
+func NewJSONWithDefault(key string, defaultValue *KredisJSON, opts ...ProxyOption) (s *ScalarJSON, err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
@@ -302,16 +302,16 @@ func NewJSONWithDefault(key string, defaultValue *kredisJSON, opts ...ProxyOptio
 }
 
 // TODO should this be returning a pointer instead struct value itself??
-func (s *ScalarJSON) Value() kredisJSON {
+func (s *ScalarJSON) Value() KredisJSON {
 	val, err := s.ValueResult()
 	if err != nil || val == nil {
-		return kredisJSON{}
+		return KredisJSON{}
 	}
 
 	return *val
 }
 
-func (s *ScalarJSON) ValueResult() (*kredisJSON, error) {
+func (s *ScalarJSON) ValueResult() (*KredisJSON, error) {
 	val, err := s.client.Get(s.ctx, s.key).Result()
 	if err != nil {
 		return nil, err
@@ -320,6 +320,6 @@ func (s *ScalarJSON) ValueResult() (*kredisJSON, error) {
 	return NewKredisJSON(val), nil
 }
 
-func (s *ScalarJSON) SetValue(v *kredisJSON) error {
+func (s *ScalarJSON) SetValue(v *KredisJSON) error {
 	return s.client.Set(s.ctx, s.key, string(v.s), s.expiresIn).Err()
 }

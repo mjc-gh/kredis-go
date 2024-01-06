@@ -11,9 +11,6 @@ type UniqueList[T KredisTyped] struct {
 	limit uint64
 }
 
-// TODO finish generic Default factories
-// TODO use expiresIn
-
 // UniqueList[bool] type
 
 func NewBoolUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[bool], error) {
@@ -162,25 +159,25 @@ func NewTimeUniqueListWithDefault(key string, limit uint64, defaultElements []ti
 	return
 }
 
-// UniqueList[kredisJSON] type
+// UniqueList[KredisJSON] type
 
-func NewJSONUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[kredisJSON], error) {
+func NewJSONUniqueList(key string, limit uint64, opts ...ProxyOption) (*UniqueList[KredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &UniqueList[kredisJSON]{Proxy: *proxy, limit: limit}, nil
+	return &UniqueList[KredisJSON]{Proxy: *proxy, limit: limit}, nil
 }
 
-func NewJSONUniqueListWithDefault(key string, limit uint64, defaultElements []kredisJSON, opts ...ProxyOption) (l *UniqueList[kredisJSON], err error) {
+func NewJSONUniqueListWithDefault(key string, limit uint64, defaultElements []KredisJSON, opts ...ProxyOption) (l *UniqueList[KredisJSON], err error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
 		return
 	}
 
-	l = &UniqueList[kredisJSON]{Proxy: *proxy, limit: limit}
+	l = &UniqueList[KredisJSON]{Proxy: *proxy, limit: limit}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err

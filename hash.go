@@ -1,6 +1,8 @@
 package kredis
 
 import (
+	"time"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -28,6 +30,156 @@ func NewBoolHashWithDefault(key string, defaultElements map[string]bool, opts ..
 	}
 
 	h = &Hash[bool]{Proxy: *proxy, typed: new(bool)}
+	err = proxy.watch(func() error {
+		_, err := h.Update(defaultElements)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Hash[float64] type
+
+func NewFloatHash(key string, opts ...ProxyOption) (*Hash[float64], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Hash[float64]{Proxy: *proxy, typed: new(float64)}, nil
+}
+
+func NewFloatHashWithDefault(key string, defaultElements map[string]float64, opts ...ProxyOption) (h *Hash[float64], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	h = &Hash[float64]{Proxy: *proxy, typed: new(float64)}
+	err = proxy.watch(func() error {
+		_, err := h.Update(defaultElements)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Hash[int] type
+
+func NewIntegerHash(key string, opts ...ProxyOption) (*Hash[int], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Hash[int]{Proxy: *proxy, typed: new(int)}, nil
+}
+
+func NewIntegerHashWithDefault(key string, defaultElements map[string]int, opts ...ProxyOption) (h *Hash[int], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	h = &Hash[int]{Proxy: *proxy, typed: new(int)}
+	err = proxy.watch(func() error {
+		_, err := h.Update(defaultElements)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Hash[string] type
+
+func NewStringHash(key string, opts ...ProxyOption) (*Hash[string], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Hash[string]{Proxy: *proxy, typed: new(string)}, nil
+}
+
+func NewStringHashWithDefault(key string, defaultElements map[string]string, opts ...ProxyOption) (h *Hash[string], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	h = &Hash[string]{Proxy: *proxy, typed: new(string)}
+	err = proxy.watch(func() error {
+		_, err := h.Update(defaultElements)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Hash[time.Time] type
+
+func NewTimeHash(key string, opts ...ProxyOption) (*Hash[time.Time], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Hash[time.Time]{Proxy: *proxy, typed: new(time.Time)}, nil
+}
+
+func NewTimeHashWithDefault(key string, defaultElements map[string]time.Time, opts ...ProxyOption) (h *Hash[time.Time], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	h = &Hash[time.Time]{Proxy: *proxy, typed: new(time.Time)}
+	err = proxy.watch(func() error {
+		_, err := h.Update(defaultElements)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+// Hash[KredisJSON] type
+
+func NewJSONHash(key string, opts ...ProxyOption) (*Hash[KredisJSON], error) {
+	proxy, err := NewProxy(key, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Hash[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}, nil
+}
+
+func NewJSONHashWithDefault(key string, defaultElements map[string]KredisJSON, opts ...ProxyOption) (h *Hash[KredisJSON], err error) {
+	proxy, err := NewProxy(key, opts...)
+	if err != nil {
+		return
+	}
+
+	h = &Hash[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}
 	err = proxy.watch(func() error {
 		_, err := h.Update(defaultElements)
 		return err

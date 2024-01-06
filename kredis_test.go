@@ -41,4 +41,4 @@ func TestKredisTestSuit(t *testing.T) {
 	suite.Run(t, new(KredisTestSuite))
 }
 
-// TODO tests for kredisJSON struct ??
+// TODO tests for KredisJSON struct ??
