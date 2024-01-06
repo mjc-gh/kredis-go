@@ -1,6 +1,6 @@
 module github.com/mjc-gh/kredis-go
 
-go 1.20
+go 1.21
 
 require (
 	github.com/fatih/color v1.16.0
