@@ -8,6 +8,7 @@ import (
 
 type List[T KredisTyped] struct {
 	Proxy
+	typed *T
 }
 
 // List[bool] type
@@ -19,7 +20,7 @@ func NewBoolList(key string, opts ...ProxyOption) (*List[bool], error) {
 		return nil, err
 	}
 
-	return &List[bool]{Proxy: *proxy}, nil
+	return &List[bool]{Proxy: *proxy, typed: new(bool)}, nil
 }
 
 func NewBoolListWithDefault(key string, defaultElements []bool, opts ...ProxyOption) (l *List[bool], err error) {
@@ -28,7 +29,7 @@ func NewBoolListWithDefault(key string, defaultElements []bool, opts ...ProxyOpt
 		return
 	}
 
-	l = &List[bool]{Proxy: *proxy}
+	l = &List[bool]{Proxy: *proxy, typed: new(bool)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -49,7 +50,7 @@ func NewIntegerList(key string, opts ...ProxyOption) (*List[int], error) {
 		return nil, err
 	}
 
-	return &List[int]{Proxy: *proxy}, nil
+	return &List[int]{Proxy: *proxy, typed: new(int)}, nil
 }
 
 func NewIntegerListWithDefault(key string, defaultElements []int, opts ...ProxyOption) (l *List[int], err error) {
@@ -58,7 +59,7 @@ func NewIntegerListWithDefault(key string, defaultElements []int, opts ...ProxyO
 		return
 	}
 
-	l = &List[int]{Proxy: *proxy}
+	l = &List[int]{Proxy: *proxy, typed: new(int)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -74,12 +75,11 @@ func NewIntegerListWithDefault(key string, defaultElements []int, opts ...ProxyO
 
 func NewFloatList(key string, opts ...ProxyOption) (*List[float64], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &List[float64]{Proxy: *proxy}, nil
+	return &List[float64]{Proxy: *proxy, typed: new(float64)}, nil
 }
 
 func NewFloatListWithDefault(key string, defaultElements []float64, opts ...ProxyOption) (l *List[float64], err error) {
@@ -88,7 +88,7 @@ func NewFloatListWithDefault(key string, defaultElements []float64, opts ...Prox
 		return
 	}
 
-	l = &List[float64]{Proxy: *proxy}
+	l = &List[float64]{Proxy: *proxy, typed: new(float64)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -104,12 +104,11 @@ func NewFloatListWithDefault(key string, defaultElements []float64, opts ...Prox
 
 func NewStringList(key string, opts ...ProxyOption) (*List[string], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &List[string]{Proxy: *proxy}, nil
+	return &List[string]{Proxy: *proxy, typed: new(string)}, nil
 }
 
 func NewStringListWithDefault(key string, defaultElements []string, opts ...ProxyOption) (l *List[string], err error) {
@@ -118,7 +117,7 @@ func NewStringListWithDefault(key string, defaultElements []string, opts ...Prox
 		return
 	}
 
-	l = &List[string]{Proxy: *proxy}
+	l = &List[string]{Proxy: *proxy, typed: new(string)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -130,16 +129,15 @@ func NewStringListWithDefault(key string, defaultElements []string, opts ...Prox
 	return
 }
 
-// List[time] type
+// List[time.Time] type
 
 func NewTimeList(key string, opts ...ProxyOption) (*List[time.Time], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &List[time.Time]{Proxy: *proxy}, nil
+	return &List[time.Time]{Proxy: *proxy, typed: new(time.Time)}, nil
 }
 
 func NewTimeListWithDefault(key string, defaultElements []time.Time, opts ...ProxyOption) (l *List[time.Time], err error) {
@@ -148,7 +146,7 @@ func NewTimeListWithDefault(key string, defaultElements []time.Time, opts ...Pro
 		return
 	}
 
-	l = &List[time.Time]{Proxy: *proxy}
+	l = &List[time.Time]{Proxy: *proxy, typed: new(time.Time)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -164,12 +162,11 @@ func NewTimeListWithDefault(key string, defaultElements []time.Time, opts ...Pro
 
 func NewJSONList(key string, opts ...ProxyOption) (*List[KredisJSON], error) {
 	proxy, err := NewProxy(key, opts...)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &List[KredisJSON]{Proxy: *proxy}, nil
+	return &List[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}, nil
 }
 
 func NewJSONListWithDefault(key string, defaultElements []KredisJSON, opts ...ProxyOption) (l *List[KredisJSON], err error) {
@@ -178,7 +175,7 @@ func NewJSONListWithDefault(key string, defaultElements []KredisJSON, opts ...Pr
 		return
 	}
 
-	l = &List[KredisJSON]{Proxy: *proxy}
+	l = &List[KredisJSON]{Proxy: *proxy, typed: new(KredisJSON)}
 	err = proxy.watch(func() error {
 		_, err := l.Append(defaultElements...)
 		return err
@@ -262,5 +259,23 @@ func (l *List[T]) Length() (llen int64, err error) {
 	return
 }
 
-// TODO add function last(n = 1) ??
-// https://github.com/rails/kredis/blob/2ccc5c6bf59e5d38870de45a03e9491a3dc8c397/lib/kredis/types/list.rb#L32-L34
+func (l List[T]) Last() (T, bool) {
+	slice, err := l.client.Do(l.ctx, "lrange", l.key, -1, -1).Slice()
+	if err != nil || len(slice) < 1 {
+		return any(*l.typed).(T), false
+	}
+
+	elements := make([]T, 1)
+	copyCmdSliceTo(slice, elements)
+	return elements[0], true
+}
+
+func (l List[T]) LastN(elements []T) (total int64, err error) {
+	slice, err := l.client.Do(l.ctx, "lrange", l.key, -len(elements), -1).Slice()
+	if err != nil {
+		return
+	}
+
+	total = copyCmdSliceTo(slice, elements)
+	return
+}

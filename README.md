@@ -17,10 +17,10 @@ together over Redis.
 
 ## Usage
 
-To Kredis, you must first configure a connection. The default connection
-configuration is named `"shared"`. `SetConfiguration` expects a config
-name string, optional namespace (pass an empty string for no namespace),
-and a Redis URL connection string.
+To use Kredis, you must first configure a connection. The default
+connection configuration is named `"shared"`. `SetConfiguration` expects
+a config name string, optional namespace (pass an empty string for no
+namespace), and a Redis URL connection string.
 
 ```go
 kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
@@ -122,17 +122,19 @@ err = enum.SetValue("error")
 
 ### Flag
 
+By default the `Mark()` function does not call `SET` with `nx`
+
 ```go
 flag, err := kredis.NewFlag("flag")
-flag.IsMarked()     // EXISTS flag
+flag.IsMarked()                            // EXISTS flag
 // false
-err = flag.Mark()   // SETNX flag 1
+err = flag.Mark()                          // SETNX flag 1
 // nil
-flag.IsMarked()     // EXISTS flag
+flag.IsMarked()                            // EXISTS flag
 // true
-err = flag.Remove() // DEL flag
+err = flag.Remove()                        // DEL flag
 
-flag.Mark(kredis.WithFlagMarkExpiry("1s")) // SET flag 1 ex 1 nx
+flag.Mark(kredis.WithFlagMarkExpiry("1s")) // SET flag 1 ex 1
 flag.IsMarked()                            // EXISTS flag
 // true
 
@@ -142,27 +144,26 @@ flag.IsMarked()                            // EXISTS flag
 // false
 ```
 
-You can use the `WithFlagMarkForced` option function to always set the
-flag (and thus not use `SET` with `nx`)
+The `SoftMark()` function will call set with `NX`
 
 ```go
-flag.Mark(kredis.WithFlagMarkExpiry("1s")) // SET flag 1 ex 1 nx
-flag.Mark(kredis.WithFlagMarkExpiry("10s"), kredis.WithFlagMarkForced())
-                                           // SET flag 1 ex 10
-flag.IsMarked()                            // EXISTS flag
+flag.SoftMark(kredis.WithFlagMarkExpiry("1s"))  // SET flag 1 ex 1 nx
+flag.SoftMark(kredis.WithFlagMarkExpiry("10s")) // SET flag 1 ex 10 nx
+flag.IsMarked()                                 // EXISTS flag
 // true
 
 time.Sleep(2 * time.Second)
 
-flag.IsMarked()                            // EXISTS flag
+flag.IsMarked()                                 // EXISTS flag
 // true
 ```
 
 ### Limiter
 
 The `Limiter` type is based off the `Counter` type and provides a
-simple rate limiting with a failsafe on Reids errors. See the original
-[Rails PR for more details](https://github.com/rails/kredis/pull/136).
+simple rate limiting type with a failsafe on Reids errors. See the
+original [Rails PR for more
+details](https://github.com/rails/kredis/pull/136).
 
 `IsExceeded()` will return `false` in the event of a Redis error.
 `Poke()` does return an error, but it can easily be ignored in Go.

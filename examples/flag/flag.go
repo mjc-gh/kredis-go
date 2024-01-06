@@ -17,15 +17,15 @@ func main() {
 	fmt.Println(flag.IsMarked())
 	flag.Remove()
 
-	flag.Mark(kredis.WithFlagMarkExpiry("1s"))
+	flag.Mark(kredis.WithFlagExpiry("1s"))
 	fmt.Println(flag.IsMarked())
 
 	time.Sleep(2 * time.Second)
 
 	fmt.Println(flag.IsMarked())
 
-	flag.Mark(kredis.WithFlagMarkExpiry("1s"))
-	flag.Mark(kredis.WithFlagMarkExpiry("10s"), kredis.WithFlagMarkForced())
+	flag.Mark(kredis.WithFlagExpiry("1s"))
+	flag.SoftMark(kredis.WithFlagExpiry("10s"))
 	fmt.Println(flag.IsMarked())
 
 	time.Sleep(2 * time.Second)

@@ -14,31 +14,37 @@ func (s *KredisTestSuite) TestFlag() {
 	s.False(flag.IsMarked())
 }
 
+func (s *KredisTestSuite) TestMarkedFlag() {
+	flag, err := NewMarkedFlag("flag")
+	s.NoError(err)
+	s.True(flag.IsMarked())
+}
+
 // TODO refactor test to check redis cmds with some sort of test env
 // ProcessHook
 func (s *KredisTestSuite) TestFlagWithMarkOptions() {
-	s.T().Skip() // TODO this test depends to much on timing :(
+	s.T().Skip()
 
 	flag, _ := NewFlag("flag_ex")
 
-	s.NoError(flag.Mark(WithFlagMarkExpiry("2ms")))
+	s.NoError(flag.Mark(WithFlagExpiry("2ms")))
 	s.True(flag.IsMarked())
 
 	time.Sleep(1 * time.Millisecond)
 
-	s.NoError(flag.Mark(WithFlagMarkExpiry("2ms")))
+	s.NoError(flag.Mark(WithFlagExpiry("2ms")))
 	s.True(flag.IsMarked())
 
 	time.Sleep(2 * time.Millisecond)
 
 	s.False(flag.IsMarked())
 
-	s.NoError(flag.Mark(WithFlagMarkExpiry("2ms")))
+	s.NoError(flag.Mark(WithFlagExpiry("2ms")))
 	s.True(flag.IsMarked())
 
 	time.Sleep(1 * time.Millisecond)
 
-	s.NoError(flag.Mark(WithFlagMarkExpiry("5ms"), WithFlagMarkForced()))
+	s.NoError(flag.Mark(WithFlagExpiry("5ms")))
 	s.True(flag.IsMarked())
 
 	time.Sleep(2 * time.Millisecond)

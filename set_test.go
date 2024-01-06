@@ -78,6 +78,14 @@ func (s *KredisTestSuite) TestFloatSet() {
 	s.NoError(e)
 	s.Equal(int64(3), n)
 
+	membersMap, e := set.MembersMap()
+	s.NoError(e)
+	s.Equal(map[float64]struct{}{
+		1.1: struct{}{},
+		2.5: struct{}{},
+		5.2: struct{}{},
+	}, membersMap)
+
 	n, e = set.Replace(4.4, 3.7)
 	s.NoError(e)
 	s.Equal(int64(2), n)
@@ -140,9 +148,16 @@ func (s *KredisTestSuite) TesTimeSet() {
 	set, e := NewTimeSet("times")
 	s.NoError(e)
 
-	n, e := set.Add(time.Now(), time.Time{})
+	t := time.Now()
+	n, e := set.Add(t, time.Time{})
 	s.NoError(e)
 	s.Equal(int64(2), n)
+
+	times := make([]time.Time, 2)
+	n, e = set.TakeN(times)
+	s.NoError(e)
+	s.Equal(int64(2), n)
+	s.Equal([]time.Time{t, time.Time{}}, times)
 }
 
 func (s *KredisTestSuite) TestTimeSetWithDefault() {

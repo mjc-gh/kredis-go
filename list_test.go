@@ -33,6 +33,16 @@ func (s *KredisTestSuite) TestStringList() {
 	s.Equal(int64(3), n)
 	s.Equal([]string{"y", "x", "a"}, elems)
 
+	last, ok := l.Last()
+	s.True(ok)
+	s.Equal("c", last)
+
+	last2 := make([]string, 2)
+	n, e = l.LastN(last2)
+	s.NoError(e)
+	s.Equal(int64(2), n)
+	s.Equal([]string{"b", "c"}, last2)
+
 	s.NoError(l.Remove("x", "a"))
 
 	n, err = l.Elements(elems)
@@ -83,6 +93,10 @@ func (s *KredisTestSuite) TestIntegerList() {
 	s.Equal([]int{9, 8, 1}, elems)
 
 	s.NoError(l.Clear())
+
+	last, ok := l.Last()
+	s.False(ok)
+	s.Empty(last)
 }
 
 func (s *KredisTestSuite) TestIntegerListWithDefault() {

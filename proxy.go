@@ -74,5 +74,5 @@ func (p *Proxy) RefreshTTL() (bool, error) {
 		return false, nil
 	}
 
-	return p.client.Expire(p.ctx, p.key, p.expiresIn).Result()
+	return p.client.ExpireXX(p.ctx, p.key, p.expiresIn).Result()
 }

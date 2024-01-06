@@ -15,7 +15,7 @@ func (suite *KredisTestSuite) SetupTest() {
 	// TODO use a unique namespace for each test (thus potentially enabling
 	// parallel tests)
 	SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	SetConfiguration("badconn", "ns", "redis://localhost:1234/0")
+	SetConfiguration("badconn", "", "redis://localhost:1234/0")
 
 	SetCommandLogging(true)
 }
@@ -41,4 +41,16 @@ func TestKredisTestSuit(t *testing.T) {
 	suite.Run(t, new(KredisTestSuite))
 }
 
-// TODO tests for KredisJSON struct ??
+func (s *KredisTestSuite) TestKredisJSON() {
+	kj := NewKredisJSON(`{"a":1}`)
+
+	s.Equal(`{"a":1}`, kj.String())
+
+	var data interface{}
+	err := kj.Unmarshal(&data)
+	s.NoError(err)
+
+	obj, ok := data.(map[string]interface{})
+	s.True(ok)
+	s.Equal(1.0, obj["a"])
+}

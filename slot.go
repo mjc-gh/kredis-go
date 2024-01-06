@@ -11,8 +11,6 @@ type Slot struct {
 	available int64
 }
 
-// TODO add expiry support
-
 func NewSlot(key string, available int64, opts ...ProxyOption) (*Slot, error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {
@@ -98,6 +96,8 @@ func (s *Slot) incr() {
 		// TODO debug logging
 		fmt.Println(err)
 	}
+
+	s.RefreshTTL()
 }
 
 func (s *Slot) decr() {
@@ -106,4 +106,6 @@ func (s *Slot) decr() {
 		// TODO debug logging
 		fmt.Println(err)
 	}
+
+	s.RefreshTTL()
 }

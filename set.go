@@ -195,8 +195,17 @@ func (s *Set[T]) Members() ([]T, error) {
 	return members, nil
 }
 
-// TODO return a map? will not work with bool...
-//func (s *Set[T]) MembersMap ??
+func (s *Set[T]) MembersMap() (map[T]struct{}, error) {
+	slice, err := s.client.Do(s.ctx, "smembers", s.key).Slice()
+	if err != nil {
+		return nil, err
+	}
+
+	members := make(map[T]struct{}, len(slice))
+	copyCmdSliceToMap(slice, members, s.typed)
+
+	return members, nil
+}
 
 func (s *Set[T]) Add(members ...T) (added int64, err error) {
 	if len(members) < 1 {
@@ -246,7 +255,15 @@ func (s *Set[T]) Take() (T, bool) {
 	return stringCmdToTyped[T](cmd, s.typed)
 }
 
-// TODO func (s *Set[T]) TakeN(memebers []T) (error)
+func (s *Set[T]) TakeN(members []T) (total int64, err error) {
+	slice, err := s.client.Do(s.ctx, "spop", s.key, len(members)).Slice()
+	if err != nil {
+		return
+	}
+
+	total = copyCmdSliceTo(slice, members)
+	return
+}
 
 func (s *Set[T]) Clear() error {
 	return s.client.Del(s.ctx, s.key).Err()

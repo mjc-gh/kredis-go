@@ -26,20 +26,19 @@ func SetCommandLogging(v bool) {
 // cmdLogging interface
 // func SetCommandLogger(userLogger cmdLogging)
 
-func SetConfiguration(name, namespace, url string) error {
-	opt, err := redis.ParseURL(url)
+type RedisOption func(*redis.Options)
 
+func SetConfiguration(name, namespace, url string, opts ...RedisOption) error {
+	opt, err := redis.ParseURL(url)
 	if err != nil {
 		return err
 	}
 
-	// TODO handle redis settings
-	//opt.ReadTimeout
-	//opt.WriteTimeout
-	//opt.PoolSize
+	for _, optFn := range opts {
+		optFn(opt)
+	}
 
 	configs[name] = &config{options: opt, namespace: namespace}
-
 	return nil
 }
 

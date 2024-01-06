@@ -7,8 +7,6 @@ type Cycle struct {
 	values []string
 }
 
-// TODO add default value factory
-
 func NewCycle(key string, values []string, opts ...ProxyOption) (*Cycle, error) {
 	proxy, err := NewProxy(key, opts...)
 	if err != nil {

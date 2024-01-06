@@ -12,6 +12,7 @@ type Enum struct {
 }
 
 var EnumEmptyValues = errors.New("values cannot be empty")
+var EnumExpiryNotSupported = errors.New("cannot use WithExpiry with Enum")
 var EnumInvalidValue = errors.New("invalid enum value")
 
 func NewEnum(key string, defaultValue string, values []string, opts ...ProxyOption) (*Enum, error) {
@@ -24,8 +25,9 @@ func NewEnum(key string, defaultValue string, values []string, opts ...ProxyOpti
 		return nil, err
 	}
 
-	// TODO return runtime error if expiresIn option is used -- this option just
-	// doesn't fit well into this Kredis data structure
+	if proxy.expiresIn != 0 {
+		return nil, EnumExpiryNotSupported
+	}
 
 	enum := &Enum{Proxy: *proxy, defaultValue: defaultValue, values: map[string]bool{}}
 	for _, value := range values {

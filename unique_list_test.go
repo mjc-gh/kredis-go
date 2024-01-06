@@ -96,4 +96,14 @@ func (s *KredisTestSuite) TestStringUniqueList() {
 	s.NoError(e)
 	s.Equal(int64(3), n)
 	s.Equal([]string{"x", "a", "b"}, elements)
+
+	last, ok := l.Last()
+	s.True(ok)
+	s.Equal("b", last)
+
+	last2 := make([]string, 2)
+	n, e = l.LastN(last2)
+	s.NoError(e)
+	s.Equal(int64(2), n)
+	s.Equal([]string{"a", "b"}, last2)
 }

@@ -29,3 +29,9 @@ func (s *KredisTestSuite) TestEnumWithEmptyValues() {
 	s.Error(err)
 	s.Equal(EnumEmptyValues, err)
 }
+
+func (s *KredisTestSuite) TestEnumWithExpiry() {
+	_, err := NewEnum("key", "go", []string{"go"}, WithExpiry("1ms"))
+	s.Error(err)
+	s.Equal(EnumExpiryNotSupported, err)
+}

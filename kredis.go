@@ -8,8 +8,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// TODO does this need to be exported??
-// type KredisJSON []byte
 type KredisJSON struct {
 	s string
 }
@@ -163,6 +161,41 @@ func copyCmdSliceTo[T KredisTyped](slice []interface{}, dst []T) (total int64) {
 			dst[i] = any(t).(T)
 		default:
 			dst[i] = any(e).(T)
+		}
+
+		total += 1
+	}
+
+	return
+}
+
+// used in most collection types for copying a slice of interfaces to a slice
+// of KredisTyped.
+func copyCmdSliceToMap[T KredisTyped](slice []interface{}, dst map[T]struct{}, typed *T) (total int64) {
+	for _, e := range slice {
+		switch any(*typed).(type) {
+		case bool:
+			b, _ := strconv.ParseBool(e.(string))
+
+			dst[any(b).(T)] = struct{}{}
+		case int:
+			n, _ := strconv.Atoi(e.(string))
+
+			dst[any(n).(T)] = struct{}{}
+		case float64:
+			f, _ := strconv.ParseFloat(e.(string), 64)
+
+			dst[any(f).(T)] = struct{}{}
+		case KredisJSON:
+			j := NewKredisJSON(e.(string))
+
+			dst[any(*j).(T)] = struct{}{}
+		case time.Time:
+			t, _ := time.Parse(time.RFC3339Nano, e.(string))
+
+			dst[any(t).(T)] = struct{}{}
+		default:
+			dst[any(e).(T)] = struct{}{}
 		}
 
 		total += 1

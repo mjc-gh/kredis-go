@@ -301,7 +301,6 @@ func NewJSONWithDefault(key string, defaultValue *KredisJSON, opts ...ProxyOptio
 	return
 }
 
-// TODO should this be returning a pointer instead struct value itself??
 func (s *ScalarJSON) Value() KredisJSON {
 	val, err := s.ValueResult()
 	if err != nil || val == nil {

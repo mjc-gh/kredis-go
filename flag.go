@@ -12,12 +12,9 @@ type Flag struct {
 
 type FlagMarkOptions struct {
 	expiresIn time.Duration
-	force     bool
 }
 
 type FlagMarkOption func(*FlagMarkOptions)
-
-// TODO add default value factory
 
 func NewFlag(key string, opts ...ProxyOption) (*Flag, error) {
 	proxy, err := NewProxy(key, opts...)
@@ -28,22 +25,36 @@ func NewFlag(key string, opts ...ProxyOption) (*Flag, error) {
 	return &Flag{Proxy: *proxy}, nil
 }
 
-// TODO this should return true/false if flag was set or not
-// true == flag.mark(expires_in: 1.second, force: false)    #=> SET myflag 1 EX 1 NX
-// false == flag.mark(expires_in: 10.seconds, force: false) #=> SET myflag 10 EX 1 NX
+func NewMarkedFlag(key string, opts ...ProxyOption) (*Flag, error) {
+	flag, err := NewFlag(key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = flag.Mark()
+	if err != nil {
+		return nil, err
+	}
+
+	return flag, nil
+}
+
 func (f *Flag) Mark(opts ...FlagMarkOption) error {
-	options := FlagMarkOptions{force: false}
+	options := FlagMarkOptions{f.expiresIn}
 	for _, opt := range opts {
 		opt(&options)
 	}
 
-	if options.force {
-		f.client.Set(f.ctx, f.key, 1, options.expiresIn)
-	} else {
-		f.client.SetNX(f.ctx, f.key, 1, options.expiresIn)
+	return f.client.Set(f.ctx, f.key, 1, options.expiresIn).Err()
+}
+
+func (f *Flag) SoftMark(opts ...FlagMarkOption) error {
+	options := FlagMarkOptions{f.expiresIn}
+	for _, opt := range opts {
+		opt(&options)
 	}
 
-	return nil
+	return f.client.SetNX(f.ctx, f.key, 1, options.expiresIn).Err()
 }
 
 func (f *Flag) IsMarked() bool {
@@ -62,7 +73,7 @@ func (f *Flag) Remove() (err error) {
 
 // Mark() function optional configuration functions
 
-func WithFlagMarkExpiry(expires string) FlagMarkOption {
+func WithFlagExpiry(expires string) FlagMarkOption {
 	return func(o *FlagMarkOptions) {
 		duration, err := time.ParseDuration(expires)
 		if err != nil {
@@ -70,11 +81,5 @@ func WithFlagMarkExpiry(expires string) FlagMarkOption {
 		}
 
 		o.expiresIn = duration
-	}
-}
-
-func WithFlagMarkForced() FlagMarkOption {
-	return func(o *FlagMarkOptions) {
-		o.force = true
 	}
 }
