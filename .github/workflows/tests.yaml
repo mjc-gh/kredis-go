@@ -1,4 +1,4 @@
-name: Kredis Go test suite
+name: Kredis Tests
 on: [push]
 
 jobs:
