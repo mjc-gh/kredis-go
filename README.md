@@ -1,5 +1,8 @@
 # Kredis
 
+[![kredis-go](https://github.com/mjc-gh/kredis-go/actions/workflows/tests.yaml/badge.svg)](https://github.com/mjc-gh/kredis-go/actions/workflows/tests.yaml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mjc-gh/kredis-go.svg)](https://pkg.go.dev/github.com/mjc-gh/kredis-go)
+
 A port of [Rails' Kredis](https://github.com/rails/kredis) for Go.
 
 > Kredis (Keyed Redis) encapsulates higher-level types and data
@@ -411,6 +414,7 @@ uniq.Clear()                      // DEL uniq
 
 - Other scalar types
     - Some sort of map type (serialized as json)
+- Add a way to call `HINCRBY` for `Hash[int]` type
 - Explore support for [pipelining](https://redis.uptrace.dev/guide/go-redis-pipelines.html)
     - With only kredis commands?
     - With a shared redis client?
