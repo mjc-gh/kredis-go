@@ -8,7 +8,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	uniq, _ := kredis.NewFloatUniqueList("uniq", 5)
 	uniq.Append(3.14, 2.718)

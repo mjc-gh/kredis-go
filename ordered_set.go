@@ -274,10 +274,6 @@ func (s *OrderedSet[T]) SetLimit(limit uint64) {
 	s.limit = limit
 }
 
-// TODO
-//func (s OrderedSet[T]) Rank(member T) int64 {
-//}
-
 func (s *OrderedSet[T]) appendScore(index int) float64 {
 	baseScore := s.baseScore()
 	incrementalScore := float64(index) * 0.000001

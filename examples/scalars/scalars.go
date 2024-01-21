@@ -9,7 +9,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	k, _ := kredis.NewTime("sessionStart", kredis.WithExpiry("1ms"))
 	_ = k.SetValue(time.Now()) // SET sessionStart

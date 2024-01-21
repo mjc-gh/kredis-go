@@ -8,7 +8,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	cycle, _ := kredis.NewCycle("cycle", []string{"ready", "set", "go"})
 	cycle.Index()

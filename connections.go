@@ -16,15 +16,6 @@ type config struct {
 
 var configs map[string]*config = map[string]*config{}
 var connections map[string]*redis.Client = map[string]*redis.Client{}
-var connectionLogging bool
-
-func SetCommandLogging(v bool) {
-	connectionLogging = v
-}
-
-// TODO add a way to configure a user provided value that implements the
-// cmdLogging interface
-// func SetCommandLogger(userLogger cmdLogging)
 
 type RedisOption func(*redis.Options)
 
@@ -56,18 +47,18 @@ func getConnection(name string) (*redis.Client, *string, error) {
 	conn = redis.NewClient(config.options)
 	connections[name] = conn
 
-	if connectionLogging {
-		conn.AddHook(newCmdLoggingHook(NewStdoutLogger()))
+	if debugLogger != nil {
+		conn.AddHook(newCmdLoggingHook(debugLogger))
 	}
 
 	return conn, &config.namespace, nil
 }
 
 type cmdLoggingHook struct {
-	cmdLogger cmdLogging
+	cmdLogger logging
 }
 
-func newCmdLoggingHook(clog cmdLogging) *cmdLoggingHook {
+func newCmdLoggingHook(clog logging) *cmdLoggingHook {
 	return &cmdLoggingHook{clog}
 }
 

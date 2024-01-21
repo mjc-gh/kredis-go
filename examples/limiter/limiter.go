@@ -6,7 +6,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	limiter, _ := kredis.NewLimiter("limiter", 5)
 

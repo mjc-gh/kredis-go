@@ -6,7 +6,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	cntr, _ := kredis.NewCounter("counter")
 	cntr.Increment(1)

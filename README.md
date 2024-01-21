@@ -37,7 +37,31 @@ in the Ruby Kredis version.
 To enable debug logging, simply call:
 
 ```go
-kredis.SetCommandLogging(true)
+kredis.EnableDebugLogging()
+```
+
+### Failsafe
+
+Kredis wraps calls in Redis in a
+[failsafe](https://github.com/rails/kredis/blob/4fbb2f5613ed049f72cba337317c5eae2a6bba28/lib/kredis/types/proxy/failsafe.rb#L9-L13).
+To match this design, certain functions around reading values
+intentionally omit returning an error and will return zero values when a
+read fails.
+
+If you need to handle errors and do not want the "failsafe" behavior,
+most types also offer functions that end in `Result` that return the
+value and an error using standard Go idioms. For example:
+
+```go
+slot, _ := kredis.NewSlot("slot", 3)
+slot.Reserve()
+
+// some time later when Redis is down...
+
+t := slot.Taken()
+// 0
+t, err := slot.TakenResult() // func TakenResult() (int64, error)
+// 0, dial tcp [::1]:6379: connect: connection refused
 ```
 
 ## Types
@@ -58,7 +82,8 @@ Collection types:
 - [Ordered Set](#ordered-set)
 - [Unique List](#unique-list)
 
-All types accept the following option functions:
+All factory functions for the various types accept the following option
+functions:
 
 - `WithConfigName` sets the Redis config to use. The function accepts a
   `string` name and should match the value passed to `SetConfiguration`.
@@ -414,7 +439,11 @@ uniq.Clear()                      // DEL uniq
 
 - Other scalar types
     - Some sort of map type (serialized as json)
-- Add a way to call `HINCRBY` for `Hash[int]` type
+- `Hash` type
+    - Add a way to call `HINCRBY` (limited to `Hash[int]`)
+- `OrderedSet` type
+    - Let the user control the ranking
+    - Add a `Rank` function to call `ZRANK`
 - Explore support for [pipelining](https://redis.uptrace.dev/guide/go-redis-pipelines.html)
     - With only kredis commands?
     - With a shared redis client?

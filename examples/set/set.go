@@ -9,7 +9,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	t := time.Date(2021, 8, 28, 23, 0, 0, 0, time.UTC)
 	times := []time.Time{t, t.Add(1 * time.Hour), t.Add(2 * time.Hour), t.Add(3 * time.Hour)}

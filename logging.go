@@ -9,15 +9,29 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type cmdLogging interface {
+type logging interface {
 	Info(redis.Cmder, time.Duration)
+	Warn(string, error)
 }
 
 type stdLogger struct{}
 
-func NewStdoutLogger() stdLogger {
-	return stdLogger{}
+var debugLogger logging
+
+// Enable logging of Redis commands and errors that are ignored by functions
+// with failsafes. This is useful for development and tests. Logging is
+// disabled by default.
+func EnableDebugLogging() {
+	debugLogger = stdLogger{}
 }
+
+// Turn off debug logging.
+func DisableDebugLogging() {
+	debugLogger = nil
+}
+
+// TODO add a way to configure a user provided value that implements the logging interface
+// func SetCommandLogger(userLogger cmdLogging)
 
 func (log stdLogger) Info(cmd redis.Cmder, dur time.Duration) {
 	name, key, args := cmdLogParts(cmd)
@@ -29,6 +43,10 @@ func (log stdLogger) Info(cmd redis.Cmder, dur time.Duration) {
 
 		fmt.Printf("Kredis (%.1fms) %s %s %s\n", msec, name, key, args)
 	}
+}
+
+func (log stdLogger) Warn(msg string, err error) {
+
 }
 
 var cmdColor = color.New(color.FgYellow).SprintFunc()

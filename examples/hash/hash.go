@@ -8,7 +8,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	dogs := map[string]kredis.KredisJSON{
 		"ollie": *kredis.NewKredisJSON(`{"weight":9.72}`),

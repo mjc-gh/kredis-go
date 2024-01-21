@@ -17,7 +17,7 @@ func (suite *KredisTestSuite) SetupTest() {
 	SetConfiguration("shared", "ns", "redis://localhost:6379/2")
 	SetConfiguration("badconn", "", "redis://localhost:1234/0")
 
-	SetCommandLogging(true)
+	EnableDebugLogging()
 }
 
 func (suite *KredisTestSuite) TearDownTest() {

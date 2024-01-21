@@ -4,7 +4,7 @@ import "github.com/mjc-gh/kredis-go"
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	slot, _ := kredis.NewSlot("slot", 3)
 	slot.Reserve()

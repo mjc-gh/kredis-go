@@ -8,7 +8,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	l, _ := kredis.NewIntegerList("key")
 	l.Append(1, 2, 3)

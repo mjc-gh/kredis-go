@@ -8,7 +8,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	enum, _ := kredis.NewEnum("enum", "go", []string{"ready", "set", "go"})
 	enum.Is("go")

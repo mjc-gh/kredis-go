@@ -9,7 +9,7 @@ import (
 
 func main() {
 	kredis.SetConfiguration("shared", "ns", "redis://localhost:6379/2")
-	kredis.SetCommandLogging(true)
+	kredis.EnableDebugLogging()
 
 	flag, _ := kredis.NewFlag("flag")
 	fmt.Println(flag.IsMarked())

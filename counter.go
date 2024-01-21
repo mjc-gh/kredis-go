@@ -60,6 +60,7 @@ func (c *Counter) Decrement(by int64) (int64, error) {
 	return decr.Val(), nil
 }
 
+// An empty value returned when there is a Redis error as a failsafe
 func (c *Counter) Value() (v int64) {
 	v, err := c.client.Get(c.ctx, c.key).Int64()
 	if err != nil && err != redis.Nil {
