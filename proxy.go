@@ -26,8 +26,8 @@ func NewProxy(key string, opts ...ProxyOption) (*Proxy, error) {
 		return nil, err
 	}
 
-	if namespace != nil {
-		key = fmt.Sprintf("%s:%s", *namespace, key)
+	if namespace != "" {
+		key = fmt.Sprintf("%s:%s", namespace, key)
 	}
 
 	return &Proxy{

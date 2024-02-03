@@ -428,7 +428,6 @@ uniq.Clear()                      // DEL uniq
 
 ## TODO
 
-- Finish remaining code `TODOs`
 - More test coverage:
     - Better coverage all possible generic types for collections
     - Test Redis commands with some sort of test env `ProcessHook`. This

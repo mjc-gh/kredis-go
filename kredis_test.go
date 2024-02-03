@@ -2,6 +2,7 @@ package kredis
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -11,6 +12,14 @@ type KredisTestSuite struct {
 	suite.Suite
 }
 
+type testLogger struct{ stdLogger }
+
+var testWarnings []string
+
+func (tl testLogger) Warn(fnName string, err error) {
+	testWarnings = append(testWarnings, fmt.Sprintf("%s %s", fnName, err.Error()))
+}
+
 func (suite *KredisTestSuite) SetupTest() {
 	// TODO use a unique namespace for each test (thus potentially enabling
 	// parallel tests)
@@ -18,6 +27,9 @@ func (suite *KredisTestSuite) SetupTest() {
 	SetConfiguration("badconn", "", "redis://localhost:1234/0")
 
 	EnableDebugLogging()
+
+	testWarnings = []string{}
+	SetDebugLogger(&testLogger{})
 }
 
 func (suite *KredisTestSuite) TearDownTest() {

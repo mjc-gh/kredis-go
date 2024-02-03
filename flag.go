@@ -60,7 +60,9 @@ func (f *Flag) SoftMark(opts ...FlagMarkOption) error {
 func (f *Flag) IsMarked() bool {
 	n, err := f.client.Exists(f.ctx, f.key).Result()
 	if err != nil && err != redis.Nil {
-		// TODO debug logging
+		if debugLogger != nil {
+			debugLogger.Warn("Flag#IsMarked", err)
+		}
 	}
 
 	return n > 0

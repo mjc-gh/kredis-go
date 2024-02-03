@@ -1,8 +1,6 @@
 package kredis
 
 import (
-	"fmt"
-
 	"github.com/redis/go-redis/v9"
 )
 
@@ -93,8 +91,9 @@ func (s *Slot) TakenResult() (t int64, err error) {
 func (s *Slot) incr() {
 	_, err := s.client.Incr(s.ctx, s.key).Result()
 	if err != nil {
-		// TODO debug logging
-		fmt.Println(err)
+		if debugLogger != nil {
+			debugLogger.Warn("Slot#Reserve()", err)
+		}
 	}
 
 	s.RefreshTTL()
@@ -103,8 +102,9 @@ func (s *Slot) incr() {
 func (s *Slot) decr() {
 	_, err := s.client.Decr(s.ctx, s.key).Result()
 	if err != nil {
-		// TODO debug logging
-		fmt.Println(err)
+		if debugLogger != nil {
+			debugLogger.Warn("Slot#Release()", err)
+		}
 	}
 
 	s.RefreshTTL()

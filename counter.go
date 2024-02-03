@@ -64,10 +64,16 @@ func (c *Counter) Decrement(by int64) (int64, error) {
 func (c *Counter) Value() (v int64) {
 	v, err := c.client.Get(c.ctx, c.key).Int64()
 	if err != nil && err != redis.Nil {
-		// TODO debug logging
+		if debugLogger != nil {
+			debugLogger.Warn("Counter#Value", err)
+		}
 	}
 
 	return
+}
+
+func (c *Counter) ValueResult() (int64, error) {
+	return c.client.Get(c.ctx, c.key).Int64()
 }
 
 func (c *Counter) Reset() (err error) {

@@ -33,15 +33,15 @@ func SetConfiguration(name, namespace, url string, opts ...RedisOption) error {
 	return nil
 }
 
-func getConnection(name string) (*redis.Client, *string, error) {
+func getConnection(name string) (*redis.Client, string, error) {
 	config, configured := configs[name]
 	if !configured {
-		return nil, nil, fmt.Errorf("%s is not a configured configuration", name)
+		return nil, "", fmt.Errorf("%s is not a configured configuration", name)
 	}
 
 	conn, ok := connections[name]
 	if ok {
-		return conn, &config.namespace, nil
+		return conn, config.namespace, nil
 	}
 
 	conn = redis.NewClient(config.options)
@@ -51,7 +51,7 @@ func getConnection(name string) (*redis.Client, *string, error) {
 		conn.AddHook(newCmdLoggingHook(debugLogger))
 	}
 
-	return conn, &config.namespace, nil
+	return conn, config.namespace, nil
 }
 
 type cmdLoggingHook struct {

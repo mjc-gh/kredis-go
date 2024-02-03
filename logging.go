@@ -30,8 +30,9 @@ func DisableDebugLogging() {
 	debugLogger = nil
 }
 
-// TODO add a way to configure a user provided value that implements the logging interface
-// func SetCommandLogger(userLogger cmdLogging)
+func SetDebugLogger(userLogger logging) {
+	debugLogger = userLogger
+}
 
 func (log stdLogger) Info(cmd redis.Cmder, dur time.Duration) {
 	name, key, args := cmdLogParts(cmd)
@@ -45,8 +46,8 @@ func (log stdLogger) Info(cmd redis.Cmder, dur time.Duration) {
 	}
 }
 
-func (log stdLogger) Warn(msg string, err error) {
-
+func (log stdLogger) Warn(fnName string, err error) {
+	fmt.Printf("Kredis error in %s: %s", fnName, err.Error())
 }
 
 var cmdColor = color.New(color.FgYellow).SprintFunc()

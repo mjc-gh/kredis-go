@@ -16,8 +16,19 @@ func NewCycle(key string, values []string, opts ...ProxyOption) (*Cycle, error) 
 	return &Cycle{Proxy: *proxy, values: values}, nil
 }
 
-func (c *Cycle) Index() int64 {
-	return c.value()
+func (c *Cycle) Index() (idx int64) {
+	idx, err := c.client.Get(c.ctx, c.key).Int64()
+	if err != nil && err != redis.Nil {
+		if debugLogger != nil {
+			debugLogger.Warn("Cycle#Index", err)
+		}
+	}
+
+	return
+}
+
+func (c *Cycle) IndexResult() (int64, error) {
+	return c.client.Get(c.ctx, c.key).Int64()
 }
 
 func (c *Cycle) Value() string {
@@ -25,17 +36,13 @@ func (c *Cycle) Value() string {
 }
 
 func (c *Cycle) Next() (err error) {
-	value := (c.value() + 1) % int64(len(c.values))
-	_, err = c.client.Set(c.ctx, c.key, value, c.expiresIn).Result()
-
-	return
-}
-
-func (c *Cycle) value() (v int64) {
-	v, err := c.client.Get(c.ctx, c.key).Int64()
+	idx, err := c.client.Get(c.ctx, c.key).Int64()
 	if err != nil && err != redis.Nil {
-		// TODO debug logging
+		return // GET error
 	}
+
+	value := (idx + 1) % int64(len(c.values))
+	_, err = c.client.Set(c.ctx, c.key, value, c.expiresIn).Result()
 
 	return
 }

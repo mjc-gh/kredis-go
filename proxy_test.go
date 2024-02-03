@@ -14,8 +14,7 @@ func (s *KredisTestSuite) TestNewProxyWithConfigName() {
 
 	s.NoError(e)
 	s.NotNil(p)
-
-	// TODO assert namespace and connnection details are right??
+	s.Equal("key", p.key)
 }
 
 func (s *KredisTestSuite) TestNewProxyWithExpiresIn() {

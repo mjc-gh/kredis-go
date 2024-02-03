@@ -1,6 +1,8 @@
 package kredis
 
-import "time"
+import (
+	"time"
+)
 
 func (s *KredisTestSuite) TestCounter() {
 	c, err := NewCounter("counter")
@@ -57,4 +59,13 @@ func (s *KredisTestSuite) TestCounterWithDefaultAndExpiry() {
 	time.Sleep(5 * time.Millisecond)
 
 	s.Empty(c.Value())
+}
+
+func (s *KredisTestSuite) TestCounterWIthBadConnection() {
+	c, _ := NewCounter("counter", WithConfigName("badconn"))
+
+	s.Empty(c.Value())
+	s.Equal([]string{
+		"Counter#Value dial tcp [::1]:1234: connect: connection refused",
+	}, testWarnings)
 }
