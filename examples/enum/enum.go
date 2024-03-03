@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/mjc-gh/kredis-go"
 )
 
@@ -16,6 +14,4 @@ func main() {
 
 	err := enum.SetValue("set")
 	err = enum.SetValue("error")
-
-	fmt.Println(err)
 }
