@@ -57,6 +57,10 @@ func (p *Proxy) watch(setter func() error) error {
 	return nil
 }
 
+func (p *Proxy) Key() string {
+	return p.key
+}
+
 // Get the key's current TTL. Redis is only called if the type was configured
 // WithExpiry(). If no expiry is configured, a zero value Duration is returned
 func (p *Proxy) TTL() (time.Duration, error) {

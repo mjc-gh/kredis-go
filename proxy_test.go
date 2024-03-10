@@ -26,3 +26,9 @@ func (s *KredisTestSuite) TestNewProxyWithExpiresIn() {
 	s.NoError(e)
 	s.Equal(75*time.Second, p.expiresIn)
 }
+
+func (s *KredisTestSuite) TestProxyKey() {
+	p, _ := NewProxy("key")
+
+	s.Equal("ns:key", p.Key())
+}
