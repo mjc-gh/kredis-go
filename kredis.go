@@ -28,7 +28,7 @@ func (kj KredisJSON) String() string {
 	return kj.s
 }
 
-func (kj *KredisJSON) Unmarshal(data *interface{}) error {
+func (kj *KredisJSON) Unmarshal(data any) error {
 	err := json.Unmarshal([]byte(kj.s), data)
 	if err != nil {
 		return err
