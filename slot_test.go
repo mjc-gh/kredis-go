@@ -1,7 +1,5 @@
 package kredis
 
-import "time"
-
 func (s *KredisTestSuite) TestSlot() {
 	slot, err := NewSlot("slot", 3)
 	s.NoError(err)
@@ -25,17 +23,13 @@ func (s *KredisTestSuite) TestSlot() {
 }
 
 func (s KredisTestSuite) TestSlotExpiry() {
-	slot, err := NewSlot("slot", 1, WithExpiry("1ms"))
+	slot, err := NewSlot("slot", 1, WithConfigName("capture"), WithExpiry("5s"))
 	s.NoError(err)
 
 	slot.Reserve()
 	s.False(slot.IsAvailable())
 
-	time.Sleep(2 * time.Millisecond)
-
-	dur, err := slot.TTL()
-	s.NoError(err)
-	s.Equal(time.Duration(-1), dur)
+	s.Equal("EXPIRE ns:slot 5", s.captureHook.Captures[2].String())
 }
 
 func (s *KredisTestSuite) TestSlotWithReserveCallback() {

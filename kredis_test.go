@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"testing"
 
+	redistesthooks "github.com/mjc-gh/redis-test-hook"
 	"github.com/stretchr/testify/suite"
 )
 
 type KredisTestSuite struct {
 	suite.Suite
+	captureHook *redistesthooks.Hook
 }
 
 type testLogger struct{ stdLogger }
@@ -24,9 +26,15 @@ func (suite *KredisTestSuite) SetupTest() {
 	// TODO use a unique namespace for each test (thus potentially enabling
 	// parallel tests)
 	SetConfiguration("shared", "ns", "redis://localhost:6379/2")
+	SetConfiguration("capture", "ns", "redis://localhost:6379/2")
 	SetConfiguration("badconn", "", "redis://localhost:1234/0")
 
 	EnableDebugLogging()
+
+	suite.captureHook = redistesthooks.New()
+
+	client, _, _ := getConnection("capture")
+	client.AddHook(suite.captureHook)
 
 	testWarnings = []string{}
 	SetDebugLogger(&testLogger{})
@@ -43,9 +51,12 @@ func (suite *KredisTestSuite) TearDownTest() {
 		c.Del(ctx, key)
 	}
 
+	suite.captureHook.Reset()
+
 	// Reset connections
 	delete(connections, "shared")
 	delete(connections, "badconn")
+	delete(connections, "capture")
 }
 
 // listen for 'go test' command --> run test methods

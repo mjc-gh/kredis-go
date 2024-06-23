@@ -4,9 +4,10 @@ go 1.19
 
 require (
 	github.com/fatih/color v1.16.0
+	github.com/mjc-gh/redis-test-hook v0.1.0
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.0.5
-	github.com/redis/go-redis/v9 v9.0.5
-	github.com/stretchr/testify v1.8.2
+	github.com/redis/go-redis/v9 v9.5.1
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
